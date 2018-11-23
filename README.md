@@ -1,6 +1,14 @@
 # ljs
 Lua with C/C++/Java/Javascript syntax
 
+I took code and ideas from :
+
+https://github.com/ex/Killa
+
+https://github.com/sajonoso/jual
+
+
+
 The default extension is ".ljs".
 
 On folder lua2ljs there is a program to convert lua sources to ljs.

@@ -1,0 +1,345 @@
+
+//------------------------------------------------------------------------------
+print(table.unpack([1, 2, 3]))
+var t = table.pack(100, 200, 300)
+print(t[1], t[2], t[3], t.n)
+
+//------------------------------------------------------------------------------
+var A = {t: {f: 7}, n: 3}
+function A::mutate(yy) {
+    this.t.f *= yy
+    this.n += yy
+}
+A->mutate(10)
+assert(A.t.f == 70 && A.n == 13)
+
+var B = [1,[2,3],4,5]
+B[2][2] *= 3
+assert(B[2][2] == 9);
+var ind = 1
+B[ind + 1][2] *= 3
+assert(B[ind + 1][2] == 27);
+
+/*
+//------------------------------------------------------------------------------
+var x, y = "private x", "private y"
+public var x = ["asdasdad"]
+global.x.gg = "gg"
+public var y = null
+print(global.x.gg, global.y)
+print(x, y)
+
+//------------------------------------------------------------------------------
+var q = {}
+public var q = {}
+function q.f() {
+    print("local f()")
+}
+public function q.f() {
+    print("global f()")
+}
+global.q.f()
+q.f()
+*/
+//------------------------------------------------------------------------------
+var t = [100,200,300]
+for ( k = 1, 3) {
+    print(k ..") "..t[k])
+}
+for (k,v in ipairs(t)) {
+    print(k ..") "..v)
+}
+print(#t);
+table.remove(t)
+for (k,v in ipairs(t)) {
+    print(k ..") "..v)
+}
+print(#t);
+table.insert(t, 2, 700)
+print(#t);
+var q = {}
+for (k,v in ipairs(t)) {
+    print(k ..") "..v)
+    table.insert(q, v);
+}
+table.sort(t, function(a, b) { return a > b })
+print(table.concat(t,",",1))
+for (i = 1 , #q) {
+    print(i .."] "..tostring(q[i]))
+}
+
+//------------------------------------------------------------------------------
+function fibonacci(n) {
+    if (n <= 1) {
+        return 1
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2)
+}
+print(fibonacci(10))
+
+//------------------------------------------------------------------------------
+function fact(n, ans) {
+    call:
+    if (n == 0) {
+        return ans
+    }
+    else {
+        n, ans = n - 1, ans * n
+        goto call
+    }
+}
+print(fact(5, 1))
+
+//------------------------------------------------------------------------------
+for (z = 1, 10) {
+    for (y = 1, 10) {
+        for (x = 1, 10) {
+            if (x ** 2 + y ** 2 == z ** 2) {
+                print('found a Pythagorean triple:', x, y, z)
+                print('now trying next z...')
+                goto zcontinue
+            }
+        }
+    }
+    zcontinue:
+}
+
+//------------------------------------------------------------------------------
+for  (i = 2, 9) {
+    var s = i .. ") "
+    //for (var j,p = 1,1; p < 1_000_000; p *= i) {
+    var j,p = 1,1
+    while ( p < 1_000_000) {
+        s = s .. p .. " "
+	p *= i
+    }
+    print(s)
+}
+
+//------------------------------------------------------------------------------
+function list_iterator(t) {
+    var i = 0
+    var n = #t
+    return function () {
+        i += 1
+        if (i < n) { return t[i] }
+    }
+}
+
+var t = [10, 20, 30, 40]
+for (element in list_iterator(t)) {
+    print(element)
+}
+
+//------------------------------------------------------------------------------
+// Sieve of Eratosthenes
+function primes(limit) {
+    var sieve = []
+    var ret = []
+    var i = 2
+    while (i < limit) {
+        while (sieve[i]) {
+            i += 1
+        }
+        if (i < limit) {
+            table.insert(ret, i)
+            for ( j = i * i, limit) {
+                sieve[j] = true
+            }
+            i += 1
+        }
+    }
+    return ret
+}
+print(table.concat(primes(100),","))
+
+//------------------------------------------------------------------------------
+function printPowers(base, count) {
+    for (k = 1, count) {
+        print(base.."^"..k.." = "..(base ** k))
+    }
+}
+printPowers(2, 10)
+
+//------------------------------------------------------------------------------
+function fizzbuzz(min, max) {
+    var i = min
+    do {
+        if ((i % 3 == 0) && (i % 5 == 0)) {
+            print("- " .. i .. " FizzBuzz")
+        }
+        else if (i % 3 == 0) {
+            print("- " .. i .. " Fizz")    
+        }
+        else if (i % 5 == 0) {
+            print("- " .. i .. " Buzz")    
+        }
+        else {
+            print("- " .. i)
+        }
+        i +=  1
+    } while (i <= max)
+}
+fizzbuzz(5, 15)
+
+//------------------------------------------------------------------------------
+function fibonacci(n) {
+    if (n < 3) {
+        return n - 1
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2)
+}
+var n = 1
+do {
+    print(n..": "..fibonacci(n))
+    n += 1
+} while (n <= 20)
+
+//------------------------------------------------------------------------------
+assert(#"0123456789" == 10)
+assert(#[1,2,3,4,5,6] == 6)
+assert(#{key:1} == 0)
+
+//------------------------------------------------------------------------------
+/*public*/ var x = 10     // global variable
+{                     // new block
+    var x = /*global.*/x  // new 'x', with value 10
+    print(x)          // 10
+    x = x + 1
+    {                 // another block
+        var x = x + 1 // another 'x'
+        print(x)      // 12
+    }
+    print(x)          // 11
+}
+print(/*global.*/x)       // 10  (the global one)
+
+//------------------------------------------------------------------------------
+var closures = []
+var cx = 20
+for (i = 1,  10) {
+    var y = 0
+    closures[i] = function() { y += 1; return cx + y }
+}
+print("closures[0](): "..closures[1]())
+print("closures[0](): "..closures[1]())
+print("closures[0](): "..closures[1]())
+print("closures[1](): "..closures[2]())
+cx = 200
+print("closures[0](): "..closures[1]())
+print("closures[1](): "..closures[2]())
+
+//------------------------------------------------------------------------------
+function trueExpr() { 
+    print("trueExpr")
+    return 10
+}
+function falseExpr() {
+    print("falseExpr")
+    return 9
+}
+var y = (true)? trueExpr(): falseExpr() // falseExpr is not called
+var x = (y < 6)? "less than 6" : (y % 2 == 0)? "even" : "odd"
+print(x) // Output: even
+
+//------------------------------------------------------------------------------
+var s1 = "testing "
+//s1 ..= "concatenation"
+s1 = s1 .. "concatenation"
+assert(s1 == "testing concatenation")
+
+//------------------------------------------------------------------------------
+// NOTE mixed table construction is disallowed:
+////var mixed = {1, 3, name: "foo", ['new']: 234}  
+
+//------------------------------------------------------------------------------
+function getAverage(array) {
+    var sum = 0
+    var lengthArray = #array
+    if (lengthArray < 1) {
+        return null
+    }
+    for (k = 1, lengthArray) {
+        sum += array[k]
+    }
+    return sum / lengthArray
+}
+print(getAverage([10, 20, 40, 50])) 
+print(getAverage([]))
+
+//------------------------------------------------------------------------------
+// 99 Bottles of beer: http://99-bottles-of-beer.net/lyrics.html
+function songOfBeers(beers) {
+    
+    function bottlesOfBeer(i)    { return i .. ' bottles of beer' }
+    function bottlesOnTheWall(i) { return bottlesOfBeer(i) .. ' on the wall' }
+    function takeOneDown()   { return '\nTake one down and pass it around, ' }
+
+    function createVerse(i) {
+        return function() {
+            return bottlesOnTheWall(i) .. ', ' .. bottlesOfBeer(i) .. '.'
+                   .. takeOneDown() .. bottlesOnTheWall(i - 1) .. '.\n'
+        }
+    }
+
+    // Create the closures that will sing the song.
+    var verses = []
+    for (i = beers, 1, -1) {
+        if (i >= 3) {
+            table.insert(verses, createVerse(i));
+        }
+        else if (i == 2) {
+            table.insert(verses, function() {
+                return '1 bottle of beer on the wall, 1 bottle of beer.'
+                        .. takeOneDown() .. bottlesOnTheWall('no more') .. '.\n'
+            })
+        }
+        else {
+            table.insert(verses, function() {
+                return bottlesOnTheWall('No more') .. ', ' 
+                       .. bottlesOfBeer('no more') 
+                       .. '.\nGo to the store and buy some more, ' 
+                       .. bottlesOnTheWall(99) .. '.\n'
+            })
+        }
+    }
+    return verses
+}
+
+for (k, verse in ipairs(songOfBeers(4))) { // real song goes with 99!
+    print(verse())
+}
+
+//------------------------------------------------------------------------------
+var arg = 'T'
+var vehicle = ((arg == 'B')? 'bus' :
+               (arg == 'A')? 'airplane' :
+               (arg == 'T')? 'train' :
+               (arg == 'C')? 'car' :
+               (arg == 'H')? 'horse' : 'feet')
+assert(vehicle == 'train')
+
+//------------------------------------------------------------------------------
+// Given that PI can be estimated using the function:
+// PI = 4 * (1 – 1/3 + 1/5 – 1/7 + ...) with more terms giving greater accuracy, 
+// write a function that calculates PI to an accuracy of 5 decimal places.
+
+print( (arg == 'T') ? "arg == 'T'" : "arg != 'T'" );
+
+function pi(precision : double) : double {
+    var a : int = 4
+    var b
+    var k : int = 1
+    precision /= 10 // this is just guessing...
+    do {
+        b = a + ((k % 2 == 0)? 4 : -4) / (2 * k + 1)
+        a , b = b , a
+        k += 1
+    } while (math.abs(a - b) >= precision)
+    return a
+}
+
+print(pi(10e-5))
+print(2*math.asin(1))
+
+//*///--------------------------------------------------------------------------
