@@ -1,0 +1,335 @@
+typedef struct LuaScanner {
+  char *top, *last_top, *cur, *ptr, *pos, *limit;
+  int line;
+} LuaScanner;
+
+#define   YYCTYPE     unsigned char
+#define   YYCURSOR    s->cur
+#define   YYMARKER    s->ptr
+#define   YYLIMIT    s->limit
+
+static void processNewLine(LuaScanner* s)
+{
+  //printf("%d:%.25s\n", s->line, s->top);
+  s->pos = s->cur;
+  s->line++;
+}
+
+static int scan(LuaScanner* s, char *buff_end) {
+
+  int nest_count = 0;
+
+regular:
+  if (s->cur >= buff_end) {
+    return TK_THEEND;
+  }
+  s->top = s->cur;
+
+/*!re2c
+  re2c:yyfill:enable = 0;
+
+  D        = [0-9] ;
+  E        = [Ee] [+-]? D+ ;
+  L        = [a-zA-Z_] ;
+
+  NUMBER   = ( D+ | D* "." D+ | D+ "." D* ) E? ;
+
+  WS       = [ \t\r\v\f] ;
+  LF       = [\n] ;
+  END      = [\000] ;
+  ANY      = [\000-\377] \ END ;
+
+  ESC      = [\\] ;
+  SQ       = ['] ;
+  DQ       = ["] ;
+
+  STRING1  = SQ ( ANY \ SQ \ ESC | ESC ANY )* SQ ;
+  STRING2  = DQ ( ANY \ DQ \ ESC | ESC ANY )* DQ ;
+
+  IDENTIFIER = L ( L | D )* ;
+
+*/
+
+/*!re2c
+
+  //witespace
+  LF              { processNewLine(s); goto regular; }
+  WS               { goto regular; }
+
+  //comments
+  "--[["           { nest_count=0; goto LongComment; }
+  "--"       { goto Comment; }
+
+  //keywords
+  "and"            { return TK_AND; }
+  "break"          { return TK_BREAK; }
+  "do"             { return TK_DO; }
+  "else"           { return TK_ELSE; }
+  "elseif"         { return TK_ELSEIF; }
+  "end"            { return TK_END; }
+  "false"          { return TK_FALSE; }
+  "for"            { return TK_FOR; }
+  "function"       { return TK_FUNCTION; }
+  //"global"         { return TK_GLOBAL; }
+  "if"             { return TK_IF; }
+  "in"             { return TK_IN; }
+  "local"          { return TK_LOCAL; }
+  "nil"            { return TK_NIL; }
+  "not"            { return TK_NOT; }
+  "or"             { return TK_OR; }
+  "repeat"         { return TK_REPEAT; }
+  "return"         { return TK_RETURN; }
+  "then"           { return TK_THEN; }
+  "true"           { return TK_TRUE; }
+  "until"          { return TK_UNTIL; }
+  "while"          { return TK_WHILE; }
+
+  //operators
+  "="               { return TK_ASSIGN; }
+  "+"               { return TK_PLUS; }
+  "-"                 { return TK_MINUS; }
+  "/"               { return TK_DIV; }
+  "*"               { return TK_MUL; }
+  "%"             { return TK_MOD; }
+  "^"             { return TK_POW; }
+  "#"             { return TK_LEN; }
+  "..."            { return TK_ELLIPSIS; }
+  ".."             { return TK_CONCAT; }
+  "<"            { return TK_LT; }
+  ">"            { return TK_BT; }
+  ","             { return TK_COMMA; }
+  "=="             { return TK_EQ; }
+  ">="             { return TK_BTEQ; }
+  "<="             { return TK_LTEQ; }
+  "~="             { return TK_NEQ; }
+
+  //lua 5.4
+  "goto"         { return TK_GOTO; }
+  "//"                 { return TK_IDIV; }
+  "::" IDENTIFIER "::"  { return TK_LABEL; }
+
+  //bitwise operators
+  "~"             { return TK_BITNOT; }
+  "|"             { return TK_BITOR; }
+  "&"             { return TK_BITAND; }
+  "<<"             { return TK_SHL; }
+  ">>"             { return TK_SHR; }
+
+  //separators
+  ","            { return TK_COMMA; }
+  ";"            { return TK_SEMICOLON; }
+  ":"            { return TK_COLON; }
+  "."            { return TK_DOT; }
+  "("            { return TK_LPAREN; }
+  ")"            { return TK_RPAREN; }
+  "{"            { return TK_LBRACE; }
+  "}"            { return TK_RBRACE; }
+  "["            { return TK_LBRACKET; }
+  "]"            { return TK_RBRACKET; }
+  "[["             { nest_count=0; goto LongString; }
+
+  //identifiers
+  IDENTIFIER     { return TK_NAME; }
+
+  //types
+  NUMBER           { return TK_NUMBER; }
+  STRING1          { return TK_STRING; }
+  STRING2          { return TK_STRING; }
+
+  //shell line
+  "#!" ( ANY \ LF )*            { goto regular; }
+
+  //catch unexpected
+  //normally this should not happen
+  ANY              { fprintf(stderr, "unexpected character: '%c' at line %d:%d\n",
+                        *s->cur, s->line, (int)(s->cur - s->pos));
+                        exit(1);
+                    }
+
+  //we finished with the input
+  END           { goto regular; }
+
+*/
+
+LongString:
+
+/*!re2c
+
+  "[["             { nest_count++; goto LongString; }
+  "]]"             { if( nest_count == 0 ) { return TK_LONGSTRING; }
+                     nest_count--; goto LongString; }
+  LF              { processNewLine(s); goto LongString; }
+
+  ANY              { goto LongString; }
+  END              { fprintf(stderr, "unfinished long string"); exit(1);}
+
+*/
+
+Comment:
+
+/*!re2c
+
+  ( ANY \ LF )*    { return TK_COMMENT; }
+  END              { goto regular; }
+
+*/
+
+LongComment:
+
+/*!re2c
+
+  "[["             { nest_count++; goto LongComment; }
+  "]]"             { if( nest_count == 0 ) return TK_LONGCOMMENT;
+                        nest_count--; goto LongComment;}
+
+  LF              { processNewLine(s); goto LongComment; }
+  ANY              { goto LongComment; }
+  END              { fprintf(stderr, "unfinished long comment"); exit(1);}
+
+*/
+
+  fprintf(stderr, "impossible"); exit(1);/* die */
+}
+
+static LuaParserToken *pushToken(LuaParserState *pState, LuaScanner *scanner, int token_id) {
+  LuaParserToken* token_value = malloc(sizeof(*token_value));
+  token_value->token_id = token_id;
+  if(scanner->last_top != scanner->top) {
+    token_value->space_before_size = (int)(scanner->top - scanner->last_top);
+    token_value->space_before_pos = (int)(scanner->last_top - pState->src);
+  }
+  else {
+    token_value->space_before_size = 0;
+    token_value->space_before_pos = 0;
+  }
+  scanner->last_top = scanner->cur;
+  token_value->token_value_size = (int)(scanner->cur - scanner->top);
+  token_value->token_value =  scanner->top;
+  pushLuaParserToken(pState, token_value);
+  return token_value;
+}
+
+int main(int argc, char *argv[]) {
+
+  FILE *fp, *traceFile;
+  long size;
+  char *buff, *buff_end;
+  size_t bytes;
+  int token;
+  LuaScanner scanner;
+  LuaParserState parser_state;
+  void *parser;
+  //ParserCount pCount;
+
+  /* Open input file */
+  const char *fname = "test.lua";
+  if(argc > 1) fname = argv[1];
+  fp = fopen(fname, "r");
+  if(fp == NULL) {
+    fprintf(stderr, "Can't open test file\n");
+    exit(-1);
+  }
+
+  /* Open trace file */
+  traceFile = fopen("trace.out", "w");
+  if(traceFile == NULL) {
+    fprintf(stderr, "Can't open trace file\n");
+    exit(-1);
+  }
+
+  /* Get file size */
+  fseek(fp, 0, SEEK_END);
+  size = ftell(fp);
+  rewind(fp);
+
+  /*We only manage sources smaller than INT_MAX size */
+  if(size > INT_MAX) {
+    printf("Error file size bigger than %d\n", INT_MAX);
+    exit(1);
+  }
+
+  /* Allocate buffer and read */
+  buff = (char*) malloc((size+1) * sizeof(char));
+  bytes = fread(buff, 1, size, fp);
+  if (bytes != size) {
+    fprintf(stderr, "Error reading input file\n");
+    exit(-1);
+  }
+  buff[size] = '\0';
+
+  /* Initialize scanner */
+  scanner.line = 1;
+  scanner.top = scanner.last_top = buff;
+  scanner.cur = buff;
+  scanner.pos = buff;
+  scanner.ptr = buff;
+  scanner.limit = buff+size;
+
+  /* Initialize parser state */
+  initializeLuaParserState(&parser_state);
+  parser_state.src = buff;
+
+  /* Initialize the parser state structure */
+  //pCount.numFunctionDefinitions = 0;
+  //pCount.numVariableDeclarations = 0;
+
+  /* Pointer to the end of the buffer */
+  buff_end = (char*) (((char*)buff) + size);
+
+  /* Create parser and set up tracing */
+  parser = LuaParserAlloc(malloc);
+#ifndef NDEBUG
+  LuaParserTrace(traceFile, "parser >> ");
+#endif
+
+  //printf("%d:%d:%d:%d\n", TK_SPACE, TK_COMMENT, TK_LONGCOMMENT, TK_THEEND);
+  while((token = scan(&scanner, buff_end))) {
+    if(token != TK_THEEND) {
+      LuaParserToken *token_value = pushToken(&parser_state, &scanner, token);
+
+      if(token < TK_LEMON_LAST_TOKEN) {
+        LuaParser(parser, token, token_value, &parser_state);
+      }
+      else //SpecialTokens
+      {
+        //size_t gap_length = scanner.cur - scanner.top;
+        switch(token) {
+          case TK_SPACE:
+            //printf("=S=%.*s=S=\n", (int)gap_length, scanner.top);
+          break;
+          case TK_COMMENT:
+            //printf("=C=%.*s=C=\n", (int)gap_length, scanner.top);
+            newStrFmt(token_value, "//%.*s", token_value->token_value_size-2, token_value->token_value+2);
+          break;
+          case TK_LONGCOMMENT:
+            //printf("=LC=%.*s=LC=\n", (int)gap_length, scanner.top);
+            newStrFmt(token_value, "/*%.*s*/", token_value->token_value_size, token_value->token_value);
+          break;
+        }
+      }
+    }
+    else {
+      if(scanner.last_top < buff_end) pushToken(&parser_state, &scanner, TK_SPACE);
+      // Execute Parse for the last time
+      LuaParser(parser, 0, NULL, &parser_state);
+      break;
+    }
+  }
+  /* Print results of parsing */
+  //printf("Number of function definitions: %d.\n", pCount.numFunctionDefinitions);
+  //printf("Number of variable declarations: %d.\n", pCount.numVariableDeclarations);
+
+  /* output the reconstruction */
+  doOutput(&parser_state);
+
+  /* Deallocate parser */
+  LuaParserFree(parser, free);
+  
+  resetLuaParserState(&parser_state);
+
+  /* Close files and deallocate */
+  fclose(fp);
+  fclose(traceFile);
+  free(buff);
+  return(0);
+}

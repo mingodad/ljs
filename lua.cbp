@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="lua-5.3.5-ljs" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="lua" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="table-decl.ljs" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="lua" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-DLUA_COMPAT_5_3" />
+			<Add option="-DLUA_USE_LINUX" />
+			<Add option="-DLUA_LJS" />
+		</Compiler>
+		<Linker>
+			<Add option="-Wl,-E" />
+			<Add library="m" />
+			<Add library="dl" />
+			<Add library="readline" />
+		</Linker>
+		<Unit filename="src/lapi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lapi.h" />
+		<Unit filename="src/lauxlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lauxlib.h" />
+		<Unit filename="src/lbaselib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lcode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lcode.h" />
+		<Unit filename="src/lcorolib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lctype.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lctype.h" />
+		<Unit filename="src/ldblib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ldebug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ldebug.h" />
+		<Unit filename="src/ldo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ldo.h" />
+		<Unit filename="src/ldump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lfunc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lfunc.h" />
+		<Unit filename="src/lgc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lgc.h" />
+		<Unit filename="src/linit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/liolib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/llex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/llex.h" />
+		<Unit filename="src/llimits.h" />
+		<Unit filename="src/lmathlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lmem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lmem.h" />
+		<Unit filename="src/loadlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lobject.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lobject.h" />
+		<Unit filename="src/lopcodes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lopcodes.h" />
+		<Unit filename="src/loslib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lparser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lparser.h" />
+		<Unit filename="src/lprefix.h" />
+		<Unit filename="src/lstate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lstate.h" />
+		<Unit filename="src/lstring.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lstring.h" />
+		<Unit filename="src/lstrlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ltable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ltable.h" />
+		<Unit filename="src/ltablib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ltm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/ltm.h" />
+		<Unit filename="src/lua.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lua.h" />
+		<Unit filename="src/lua.hpp" />
+		<Unit filename="src/luaconf.h" />
+		<Unit filename="src/lualib.h" />
+		<Unit filename="src/lundump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lundump.h" />
+		<Unit filename="src/lutf8lib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lvm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lvm.h" />
+		<Unit filename="src/lzio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/lzio.h" />
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

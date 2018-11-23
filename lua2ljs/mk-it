@@ -1,0 +1,17 @@
+#!/bin/bash
+[ -a lemon ] || gcc -o lemon lemon.c
+
+parser_fn=lua-parser
+if ./lemon $parser_fn.ly
+then 
+    if re2c -Wundefined-control-flow $parser_fn.re2c -o $parser_fn-re2c.c
+    then
+	cat $parser_fn-re2c.c >> $parser_fn.c
+	#if gcc -Wall -O2 -DNDEBUG -o $parser_fn $parser_fn.c
+	if gcc -Wall -g -o $parser_fn $parser_fn.c
+	then
+	    echo Done!
+	    ./$parser_fn > test-rmk.lua 2>&1
+	fi
+    fi
+fi
