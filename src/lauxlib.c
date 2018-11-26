@@ -828,7 +828,7 @@ LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
         lua_pushstring(L, (lua_toboolean(L, idx) ? "true" : "false"));
         break;
       case LUA_TNIL:
-        lua_pushliteral(L, "nil");
+        lua_pushliteral(L, "null");
         break;
       default: {
         int tt = luaL_getmetafield(L, idx, "__name");  /* try name */
