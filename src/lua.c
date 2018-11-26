@@ -27,7 +27,7 @@
 #endif
 
 #if !defined(LUA_PROGNAME)
-#define LUA_PROGNAME		"lua"
+#define LUA_PROGNAME		"ljs"
 #endif
 
 #if !defined(LUA_MAXINPUT)
@@ -35,7 +35,7 @@
 #endif
 
 #if !defined(LUA_INIT_VAR)
-#define LUA_INIT_VAR		"LUA_INIT"
+#define LUA_INIT_VAR		"LJS_INIT"
 #endif
 
 #define LUA_INITVARVERSION	LUA_INIT_VAR LUA_VERSUFFIX

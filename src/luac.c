@@ -25,7 +25,7 @@
 static void PrintFunction(const Proto* f, int full);
 #define luaU_print	PrintFunction
 
-#define PROGNAME	"luac"		/* default program name */
+#define PROGNAME	"ljsc"		/* default program name */
 #define OUTPUT		PROGNAME ".out"	/* default output file */
 
 static int listing=0;			/* list bytecodes? */
@@ -257,7 +257,7 @@ static void PrintConstant(const Proto* f, int i)
  switch (ttype(o))
  {
   case LUA_TNIL:
-	printf("nil");
+	printf("null");
 	break;
   case LUA_TBOOLEAN:
 	printf(bvalue(o) ? "true" : "false");
