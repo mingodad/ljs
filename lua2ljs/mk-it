@@ -8,10 +8,10 @@ then
     then
 	cat $parser_fn-re2c.c >> $parser_fn.c
 	#if gcc -Wall -O2 -DNDEBUG -o $parser_fn $parser_fn.c
-	if gcc -Wall -g -o $parser_fn $parser_fn.c
+	if gcc -Wall -g -o lua2ljs $parser_fn.c
 	then
 	    echo Done!
-	    ./$parser_fn > test-rmk.lua 2>&1
+	    ./lua2ljs > test-rmk.lua 2>&1
 	fi
     fi
 fi

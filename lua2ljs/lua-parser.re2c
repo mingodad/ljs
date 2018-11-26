@@ -17,7 +17,8 @@ static void processNewLine(LuaScanner* s)
 
 static int scan(LuaScanner* s, char *buff_end) {
 
-  int nest_count = 0;
+  int nest_count = 0, quote_size = 0, long_start_line;
+  char *long_top;
 
 regular:
   if (s->cur >= buff_end) {
@@ -57,7 +58,7 @@ regular:
   WS               { goto regular; }
 
   //comments
-  "--[["           { nest_count=0; goto LongComment; }
+  "--[" "="* "[" { long_start_line = s->line; nest_count=0; quote_size = ((int)(s->cur - s->top)) - 2;  goto LongComment; }
   "--"       { goto Comment; }
 
   //keywords
@@ -126,7 +127,7 @@ regular:
   "}"            { return TK_RBRACE; }
   "["            { return TK_LBRACKET; }
   "]"            { return TK_RBRACKET; }
-  "[["             { nest_count=0; goto LongString; }
+  "[" "="* "["  { long_start_line = s->line; nest_count=0; quote_size = (int)(s->cur - s->top); goto LongString; }
 
   //identifiers
   IDENTIFIER     { return TK_NAME; }
@@ -152,16 +153,18 @@ regular:
 */
 
 LongString:
+  long_top = s->cur;
 
 /*!re2c
 
-  "[["             { nest_count++; goto LongString; }
-  "]]"             { if( nest_count == 0 ) { return TK_LONGSTRING; }
-                     nest_count--; goto LongString; }
+  "[" "="* "["   { int qsz = (int)(s->cur - long_top); if(qsz == quote_size) nest_count++; goto LongString; }
+  ("]" "="*) / "]"   { int qsz = (int)(s->cur+1 - long_top); if( (nest_count == 0) && (qsz == quote_size)) { ++s->cur; return TK_LONGSTRING; };
+                          if(qsz == quote_size) nest_count--; goto LongString; }
+
   LF              { processNewLine(s); goto LongString; }
 
   ANY              { goto LongString; }
-  END              { fprintf(stderr, "unfinished long string"); exit(1);}
+  END              { fprintf(stderr, "unfinished long string at line %d\n", long_start_line); exit(1);}
 
 */
 
@@ -175,16 +178,17 @@ Comment:
 */
 
 LongComment:
+  long_top = s->cur;
 
 /*!re2c
 
-  "[["             { nest_count++; goto LongComment; }
-  "]]"             { if( nest_count == 0 ) return TK_LONGCOMMENT;
-                        nest_count--; goto LongComment;}
+  "[" "="* "["   { int qsz = (int)(s->cur - long_top); if(qsz == quote_size) nest_count++; goto LongComment; }
+  ("]" "="*) / "]"   { int qsz = (int)(s->cur+1 - long_top); if( (nest_count == 0) && (qsz == quote_size)) { ++s->cur; return TK_LONGCOMMENT; };
+                          if(qsz == quote_size) nest_count--; goto LongComment; }
 
   LF              { processNewLine(s); goto LongComment; }
   ANY              { goto LongComment; }
-  END              { fprintf(stderr, "unfinished long comment"); exit(1);}
+  END              { fprintf(stderr, "unfinished long comment at line %d\n", long_start_line); exit(1);}
 
 */
 
@@ -193,6 +197,7 @@ LongComment:
 
 static LuaParserToken *pushToken(LuaParserState *pState, LuaScanner *scanner, int token_id) {
   LuaParserToken* token_value = malloc(sizeof(*token_value));
+  token_value->flags = 0;
   token_value->token_id = token_id;
   if(scanner->last_top != scanner->top) {
     token_value->space_before_size = (int)(scanner->top - scanner->last_top);
@@ -221,9 +226,20 @@ int main(int argc, char *argv[]) {
   void *parser;
   //ParserCount pCount;
 
+  int fn_argc = 1;
+  int noToCompound = 0;
+  if(argc > 2) {
+    if (strcmp(argv[1] , "-nc") == 0) noToCompound = 1;
+    else {
+      printf("usage : %s [options] lua_fname\n\toptions:\n\t\t-nc\tdo not convert to compound assginments\n", argv[0]);
+      exit(1);
+    }
+    fn_argc = 2;
+  }
+
   /* Open input file */
   const char *fname = "test.lua";
-  if(argc > 1) fname = argv[1];
+  if(argc > 1) fname = argv[fn_argc];
   fp = fopen(fname, "r");
   if(fp == NULL) {
     fprintf(stderr, "Can't open test file\n");
@@ -248,14 +264,23 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  /* Allocate buffer and read */
-  buff = (char*) malloc((size+1) * sizeof(char));
+  /*
+  * Allocate buffer and read, +2 just in case file do not end in '\n'
+  */
+  buff = (char*) malloc((size+2) * sizeof(char));
   bytes = fread(buff, 1, size, fp);
   if (bytes != size) {
     fprintf(stderr, "Error reading input file\n");
     exit(-1);
   }
   buff[size] = '\0';
+
+  if(size > 1 && buff[size-1] != '\n') {
+    /* to make things easy to parse we need a '\n' at the end */
+    buff[size] = '\n';
+    buff[size+1] = '\0';
+    ++size;
+  }
 
   /* Initialize scanner */
   scanner.line = 1;
@@ -268,6 +293,7 @@ int main(int argc, char *argv[]) {
   /* Initialize parser state */
   initializeLuaParserState(&parser_state);
   parser_state.src = buff;
+  parser_state.noToCompound = noToCompound;
 
   /* Initialize the parser state structure */
   //pCount.numFunctionDefinitions = 0;
@@ -301,9 +327,13 @@ int main(int argc, char *argv[]) {
             //printf("=C=%.*s=C=\n", (int)gap_length, scanner.top);
             newStrFmt(token_value, "//%.*s", token_value->token_value_size-2, token_value->token_value+2);
           break;
-          case TK_LONGCOMMENT:
+          case TK_LONGCOMMENT: {
             //printf("=LC=%.*s=LC=\n", (int)gap_length, scanner.top);
-            newStrFmt(token_value, "/*%.*s*/", token_value->token_value_size, token_value->token_value);
+            int quote_end = 4; // "--[["
+            while(token_value->token_value[quote_end-1] != '[') ++quote_end; //try to find the end
+            newStrFmt(token_value, "/*%.*s*/", token_value->token_value_size - quote_end - (quote_end-2), // -2 for "--"
+                                                                  token_value->token_value + quote_end);
+          }
           break;
         }
       }

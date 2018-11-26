@@ -25,12 +25,17 @@
     TK_THEEND
   };
 
+  enum TokenFlags {
+    noSemicolonNeeded = 0x01,
+  };
+
   typedef struct LuaParserToken {
     int token_id;
     int space_before_size;
     int space_before_pos;
     int token_value_size;
     const char *token_value;
+    int flags;
   } LuaParserToken;
 
  // void dummyFree(void *p) {assert(p);};
@@ -39,6 +44,7 @@
     const char *src;
     void **stack;
     int stack_size, stack_top;
+    int noToCompound;
   } LuaParserState;
 
   void initializeLuaParserState(LuaParserState *pState) {
@@ -46,6 +52,7 @@
     pState->stack = NULL;
     pState->stack_size = 0;
     pState->stack_top = 0;
+    pState->noToCompound = 0;
   }
 
   void resetLuaParserState(LuaParserState *pState) {
@@ -87,6 +94,10 @@
   }
 
   LuaParserToken *getLastLuaParserState(LuaParserState *pState) {
+    /*
+    * There is a problem with this when the last stement is not followed by a '\n'
+    * right now we are avoiding it by adding a '\n' at the end when reading the file
+    */
     int idx = pState->stack_top-2;
     LuaParserToken *ltk = pState->stack[idx];
     for(; idx >= 0; --idx) {
@@ -156,6 +167,7 @@
   
   void checkSetAssignTokenOpToken(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1) {
     if(tkAssign->token_id != TK_ASSIGN) return;
+    if(pState->noToCompound) return;
     if(tkSrc->token_value_size == tk1->token_value_size) {
       if(strncmp(tkSrc->token_value, tk1->token_value, tkSrc->token_value_size) == 0) {
         LuaParserToken *tkOp = getNextLuaParserState(pState, tk1);
@@ -187,6 +199,24 @@
     printf("%d : %.*s\n", tk->token_id, tk->token_value_size, tk->token_value);
   }
 
+  void setTokenFlag(LuaParserToken *tk, enum TokenFlags fv, int OnOff) {
+    if(OnOff) tk->flags |= fv;
+    else tk->flags &= ~fv;
+  }
+
+  void fixLongStringQuote(LuaParserToken *tk) {
+    if(tk->token_value[1] == '[') {
+      /* we need at least one '=' on the quote to differentiate from arrays */
+      int tk_vsz = abs(tk->token_value_size);
+      int sz = tk_vsz + 2;
+      char *str = malloc(sz+1);
+      snprintf(str, sz+1, "[=[%.*s]=]", tk_vsz-4, tk->token_value+2);
+      if(tk->token_value_size < 0) free((void*)tk->token_value);
+      tk->token_value = str;
+      tk->token_value_size = sz * -1;
+    }
+  }
+
 }
 
 %extra_argument { LuaParserState *pState }
@@ -210,7 +240,8 @@
 chunk      ::= block .
 
 semi       ::= . { LuaParserToken *tk = getLastLuaParserState(pState);
-                              newStrFmt(tk, "%.*s;", tk->token_value_size, tk->token_value); }
+                              if(!(tk->flags & noSemicolonNeeded))
+                                newStrFmt(tk, "%.*s;", tk->token_value_size, tk->token_value); }
 semi       ::= SEMICOLON .
 
 block      ::= scope statlist .
@@ -228,21 +259,21 @@ statlist   ::= statlist stat semi .
 //statlist   ::= SPACE .
 //statlist   ::= THEEND .
 
-stat       ::= DO(A) block END(B) . { setTokenValue(A, "{"); setTokenValue(B, "}");}
-stat       ::= WHILE(A) exp DO(B) block END(C) . { setTokenValue(A, "while("); setTokenValue(B, ") {"); setTokenValue(C, "}");}
-stat       ::= repetition DO(A) block END(B) . { setTokenValue(A, ") {"); setTokenValue(B, "}");}
+stat       ::= DO(A) block END(B) . { setTokenValue(A, "{"); setTokenValue(B, "}"); setTokenFlag(B, noSemicolonNeeded, 1);}
+stat       ::= WHILE(A) exp DO(B) block END(C) . { setTokenValue(A, "while("); setTokenValue(B, ") {"); setTokenValue(C, "}"); setTokenFlag(C, noSemicolonNeeded, 1);}
+stat       ::= repetition DO(A) block END(B) . { setTokenValue(A, ") {"); setTokenValue(B, "}"); setTokenFlag(B, noSemicolonNeeded, 1);}
 stat       ::= REPEAT(A) ublock . { setTokenValue(A, "do {"); }
-stat       ::= IF(A) conds END(B) . { setTokenValue(A, "if("); setTokenValue(B, "}");}
+stat       ::= IF(A) conds END(B) . { setTokenValue(A, "if("); setTokenValue(B, "}"); setTokenFlag(B, noSemicolonNeeded, 1);}
 stat       ::= FUNCTION funcname funcbody .
 stat       ::= setlist(A) ASSIGN(B) explist1(C) . {checkSetAssignTokenOpToken(pState, A, B, C);}
 stat       ::= functioncall .
 
 //%ifdef LUA_GOTO // lua 5.2 and up
-stat       ::= GOTO NAME .
-stat       ::= LABEL(A) . { newStrFmt(A, "%.*s", A->token_value_size-3, A->token_value+2);}
+stat       ::= GOTO ident .
+stat       ::= LABEL(A) . { newStrFmt(A, "%.*s", A->token_value_size-3, A->token_value+2);  setTokenFlag(A, noSemicolonNeeded, 1);}
 //%endif
 
-repetition ::= FOR(A) NAME ASSIGN explist23 . {setTokenValue(A, "for(");}
+repetition ::= FOR(A) ident ASSIGN explist23 . {setTokenValue(A, "for(");}
 repetition ::= FOR(A) namelist IN explist1 . {setTokenValue(A, "for(");}
 
 conds      ::= condlist .
@@ -259,16 +290,16 @@ laststat   ::= RETURN explist1 .
 
 binding    ::= LOCAL(A) namelist . { local2var(A);}
 binding    ::= LOCAL(A) namelist ASSIGN(B) explist1 . { local2var(A); /*setTokenValue(B, ":=:");*/}
-binding    ::= LOCAL(A) FUNCTION NAME funcbody . { local2var(A);}
+binding    ::= LOCAL(A) FUNCTION ident funcbody . { local2var(A);}
 
 funcname   ::= dottedname .
-funcname   ::= dottedname COLON(A) NAME . { setTokenValue(A, "::");}
+funcname   ::= dottedname COLON(A) ident . { setTokenValue(A, "::");}
 
-dottedname ::= NAME .
-dottedname ::= dottedname DOT NAME .
+dottedname ::= ident .
+dottedname ::= dottedname DOT ident .
 
-namelist   ::= NAME .
-namelist   ::= namelist COMMA NAME .
+namelist   ::= ident .
+namelist   ::= namelist COMMA ident .
 
 explist1   ::= exp .
 explist1   ::= explist1 COMMA exp .
@@ -286,36 +317,35 @@ explist23  ::= exp COMMA exp COMMA exp .
 %right     NOT LEN .
 %right     POW .
 
-exp        ::= NIL .
+exp        ::= NIL(A) .  { setTokenValue(A, "null");}
 exp        ::= TRUE .
 exp        ::= FALSE .
 exp        ::= NUMBER .
-exp        ::= STRING .
-exp        ::= LONGSTRING .
+exp        ::= string .
 exp        ::= ELLIPSIS .
 exp        ::= function .
 exp        ::= prefixexp .
 exp        ::= tableconstructor .
 //unary operators
-exp        ::= NOT exp . [NOT]
+exp        ::= NOT(A) exp . [NOT]  { setTokenValue(A, "!");}
 exp        ::= LEN exp . [NOT]
 exp        ::= MINUS exp . [NOT]
 //binary operators
-exp        ::= exp OR exp .
-exp        ::= exp AND exp .
+exp        ::= exp OR(A) exp . { setTokenValue(A, "||");}
+exp        ::= exp AND(A) exp . { setTokenValue(A, "&&");}
 exp        ::= exp LT exp .
 exp        ::= exp LTEQ exp .
 exp        ::= exp BT exp .
 exp        ::= exp BTEQ exp .
 exp        ::= exp EQ exp .
 exp        ::= exp NEQ(A) exp . { setTokenValue(A, "!=");}
-exp        ::= exp CONCAT(A) exp . { setTokenValue(A, "+");}
+exp        ::= exp CONCAT exp . //{ setTokenValue(A, "+");}
 exp        ::= exp PLUS exp .
 exp        ::= exp MINUS exp .
 exp        ::= exp MUL exp .
 exp        ::= exp DIV exp .
 exp        ::= exp MOD exp .
-exp        ::= exp POW exp .
+exp        ::= exp POW(A) exp .  { setTokenValue(A, "**");}
 
 //%ifdef LUA_BITOP //lua 5.3 and up
 %left      IDIV SHL SHR .
@@ -332,26 +362,27 @@ exp        ::= exp BITOR exp .
 setlist    ::= var .
 setlist    ::= setlist COMMA var .
 
-var        ::= NAME .
+var        ::= ident .
 var        ::= prefixexp LBRACKET exp RBRACKET .
-var        ::= prefixexp DOT NAME .
+var        ::= prefixexp DOT ident .
 
 prefixexp  ::= var .
 prefixexp  ::= functioncall .
 prefixexp  ::= OPEN exp RPAREN .
 
 functioncall ::= prefixexp args .
-functioncall ::= prefixexp COLON(A) NAME args . { setTokenValue(A, "->");}
+functioncall ::= prefixexp COLON(A) ident args . { setTokenValue(A, "->");}
 
 args        ::= LPAREN RPAREN .
 args        ::= LPAREN explist1 RPAREN .
 args(A)        ::= tableconstructor . { newStrFmt(A, "(%.*s", A->token_value_size, A->token_value);
                                                         setTokenValue(getLastLuaParserState(pState), "})"); }
-args(A)        ::= STRING . { newStrFmt(A, "(%.*s)", A->token_value_size, A->token_value);}
+args(A)        ::= string . { newStrFmt(A, "(%.*s)", A->token_value_size, A->token_value);}
 
-function    ::= FUNCTION funcbody .
+function    ::= FUNCTION funcbody . {LuaParserToken *tk = getLastLuaParserState(pState);
+                                                          /* here we invert the setting done on funcbody */ setTokenFlag(tk, noSemicolonNeeded, 0);}
 
-funcbody    ::= params block END(A) . { setTokenValue(A, "}");}
+funcbody    ::= params block END(A) . { setTokenValue(A, "}");  setTokenFlag(A, noSemicolonNeeded, 1);}
 
 params      ::= LPAREN parlist RPAREN(A) . { setTokenValue(A, ") {");}
 
@@ -371,8 +402,22 @@ fieldlist   ::= field .
 fieldlist   ::= fieldlist fieldsep field .
 
 field       ::= exp .
-field       ::= NAME ASSIGN exp .
+field       ::= ident ASSIGN exp .
 field       ::= LBRACKET exp RBRACKET ASSIGN exp .
+
+ident     ::= NAME(A) . {
+                                      #define SELF_NAME "self"
+                                      if(A->token_value_size == (sizeof(SELF_NAME)-1) 
+                                            && strncmp(A->token_value, SELF_NAME, A->token_value_size) == 0) setTokenValue(A, "this");
+                                      #undef SELF_NAME
+                                      #define VAR_NAME "var"
+                                      else if(A->token_value_size == (sizeof(VAR_NAME)-1) 
+                                            && strncmp(A->token_value, VAR_NAME, A->token_value_size) == 0) setTokenValue(A, "_v_var");
+                                      #undef VAR_NAME
+                                    }
+
+string    ::= STRING .
+string    ::= LONGSTRING(A) . {fixLongStringQuote(A);}
 
 //comment ::= COMMENT .
 //comment ::= LONGCOMMENT .

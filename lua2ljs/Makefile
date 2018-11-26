@@ -2,7 +2,7 @@ parser_fn = lua-parser
 #CFLAGS=-O2 -DNDEBUG
 CFLAGS = -Wall -g
 
-$(parser_fn): $(parser_fn).c
+lua2ljs: $(parser_fn).c
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(parser_fn).c: $(parser_fn).ly lemon lempar.c $(parser_fn).re2c.c
@@ -19,4 +19,4 @@ lemon: lemon.c
 .PHONY: clean
 
 clean:
-	-rm $(parser_fn) $(parser_fn).c $(parser_fn).re2c.c
+	-rm lemon lua2ljs $(parser_fn).out $(parser_fn).[ch] $(parser_fn).re2c.c

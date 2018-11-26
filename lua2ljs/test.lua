@@ -53,6 +53,26 @@ Multiline comment
 is here
 ]]
 
+--[==[
+Multiline comment
+is here too
+]==]
+
+local lstr = [[
+Multiline string
+is here
+]]
+
+local lstr2 = [=[
+Multiline string
+is here too
+]=]
+
+local lstr3 = [===[
+Multiline string
+is here too
+]===]
+
 local LTEST_FLOAT_TOLERANCE = 0.001
 
 
@@ -71,6 +91,10 @@ a.t = {i=-100}
 a["t"].x = function (self, a,b) return self.i+a+b end
 
 assert(a.t:x(2,3) == -95)
+
+local t = 1; for j=1,10 do t = t + j end; t = 0
+
+local var = 3;
 
 do
   local a = {x=0}
@@ -157,3 +181,6 @@ lfequal = function(a, b)
     end
 end
 
+if 1 == 2 then
+  print("1 == 2");
+end
