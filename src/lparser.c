@@ -596,7 +596,7 @@ static void close_func (LexState *ls) {
 ** 'until' closes syntactical blocks, but do not close scope,
 ** so it is handled in separate.
 */
-static int block_follow (LexState *ls, int dowhile) {
+static int block_follow (LexState *ls /*, int dowhile*/) {
   switch (ls->t.token) {
     case TK_ELSE:
     case '}': case TK_EOS:
@@ -608,7 +608,7 @@ static int block_follow (LexState *ls, int dowhile) {
 
 static void statlist (LexState *ls) {
   /* statlist -> { stat [';'] } */
-  while (!block_follow(ls, 1)) {
+  while (!block_follow(ls /*, 1*/)) {
     if (ls->t.token == TK_RETURN) {
       statement(ls);
       return;  /* 'return' must be last statement */
@@ -1361,7 +1361,7 @@ static void labelstat (LexState *ls, TString *label, int line) {
   /* create new entry for this label */
   l = newlabelentry(ls, ll, label, line, luaK_getlabel(fs));
   skipnoopstat(ls);  /* skip other no-op statements */
-  if (block_follow(ls, 0)) {  /* label is last no-op statement in the block? */
+  if (block_follow(ls /*, 0*/)) {  /* label is last no-op statement in the block? */
     /* assume that locals are already out of scope */
     ll->arr[l].nactvar = fs->bl->nactvar;
   }
@@ -1369,7 +1369,7 @@ static void labelstat (LexState *ls, TString *label, int line) {
 }
 
 
-static void whilestat (LexState *ls, int line) {
+static void whilestat (LexState *ls /*, int line*/) {
   /* whilestat -> WHILE ( cond ) block */
   FuncState *fs = ls->fs;
   int whileinit;
@@ -1532,7 +1532,7 @@ static void test_then_block (LexState *ls, int *escapelist) {
     enterblock(fs, &bl, 0);  /* must enter block before 'goto' */
     gotostat(ls, v.t);  /* handle goto/break */
     while (testnext(ls, ';')) {}  /* skip colons */
-    if (block_follow(ls, 0)) {  /* 'goto' is the entire block? */
+    if (block_follow(ls /*, 0*/)) {  /* 'goto' is the entire block? */
       leaveblock(fs);
       return;  /* and that is it */
     }
@@ -1552,7 +1552,7 @@ static void test_then_block (LexState *ls, int *escapelist) {
 }
 
 
-static void ifstat (LexState *ls, int line) {
+static void ifstat (LexState *ls /*, int line*/) {
   /* ifstat -> IF ( cond ) block {ELSE IF ( cond ) block} [ELSE block] */
   FuncState *fs = ls->fs;
   int escapelist = NO_JUMP;  /* exit list for finished parts */
@@ -1662,7 +1662,7 @@ static void retstat (LexState *ls) {
   FuncState *fs = ls->fs;
   expdesc e;
   int first, nret;  /* registers with returned values */
-  if (block_follow(ls, 1) || ls->t.token == ';')
+  if (block_follow(ls /*, 1*/) || ls->t.token == ';')
     first = nret = 0;  /* return no values */
   else {
     nret = explist(ls, &e);  /* optional return values */
@@ -1699,11 +1699,11 @@ static void statement (LexState *ls) {
       break;
     }
     case TK_IF: {  /* stat -> ifstat */
-      ifstat(ls, line);
+      ifstat(ls /*, line*/);
       break;
     }
     case TK_WHILE: {  /* stat -> whilestat */
-      whilestat(ls, line);
+      whilestat(ls /*, line*/);
       break;
     }
     case '{': {  /* stat -> { block } */
@@ -1715,7 +1715,7 @@ static void statement (LexState *ls) {
       break;
     }
     case TK_DO: {  /* stat -> dowhilestat */
-      dowhilestat(ls, line);
+      dowhilestat(ls , line);
       break;
     }
     case TK_FUNCTION: {  /* stat -> funcstat */
