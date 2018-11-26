@@ -1,9 +1,9 @@
-.\" $Id: lua.man,v 1.14 2016/10/17 15:43:50 lhf Exp $
-.TH LUA 1 "$Date: 2016/10/17 15:43:50 $"
+.\" $Id: ljs.man,v 1.14 2016/10/17 15:43:50 lhf Exp $
+.TH LJS 1 "$Date: 2016/10/17 15:43:50 $"
 .SH NAME
-lua \- Lua interpreter
+ljs \- LJS interpreter
 .SH SYNOPSIS
-.B lua
+.B ljs
 [
 .I options
 ]
@@ -14,21 +14,21 @@ lua \- Lua interpreter
 ]
 ]
 .SH DESCRIPTION
-.B lua
-is the standalone Lua interpreter.
-It loads and executes Lua programs,
+.B ljs
+is the standalone LJS interpreter.
+It loads and executes LJS programs,
 either in textual source form or
 in precompiled binary form.
 (Precompiled binaries are output by
-.BR luac ,
-the Lua compiler.)
-.B lua
+.BR ljsc ,
+the LJS compiler.)
+.B ljs
 can be used as a batch interpreter and also interactively.
 .LP
 The given
 .I options
 are handled in order and then
-the Lua program in file
+the LJS program in file
 .I script
 is loaded and executed.
 The given
@@ -46,7 +46,7 @@ otherwise,
 is assumed.
 .LP
 In interactive mode,
-.B lua
+.B ljs
 prompts the user,
 reads lines from the standard input,
 and executes them as they are read.
@@ -59,18 +59,18 @@ a syntax error is found.
 .LP
 At the very start,
 before even handling the command line,
-.B lua
+.B ljs
 checks the contents of the environment variables
-.B LUA_INIT_5_3
+.B LJS_INIT_5_3
 or
-.BR LUA_INIT ,
+.BR LJS_INIT ,
 in that order.
 If the contents is of the form
 .RI '@ filename ',
 then
 .I filename
 is executed.
-Otherwise, the string is assumed to be a Lua statement and is executed.
+Otherwise, the string is assumed to be a LJS statement and is executed.
 .SH OPTIONS
 .TP
 .BI \-e " stat"
@@ -99,7 +99,7 @@ stop handling options.
 .B \-
 stop handling options and execute the standard input as a file.
 .SH "SEE ALSO"
-.BR luac (1)
+.BR ljsc (1)
 .br
 The documentation at lua.org,
 especially section 7 of the reference manual.
@@ -108,5 +108,6 @@ Error messages should be self explanatory.
 .SH AUTHORS
 R. Ierusalimschy,
 L. H. de Figueiredo,
-W. Celes
+W. Celes,
+Domingo Alvarez Duarte
 .\" EOF

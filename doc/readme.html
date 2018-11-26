@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>Lua 5.3 readme</TITLE>
+<TITLE>LJS based on Lua 5.3 readme</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="lua.css">
 <META HTTP-EQUIV="content-type" CONTENT="text/html; charset=iso-8859-1">
 <STYLE TYPE="text/css">
@@ -30,7 +30,7 @@ tt, kbd, code {
 
 <H1>
 <A HREF="http://www.lua.org/"><IMG SRC="logo.gif" ALT="Lua"></A>
-Welcome to Lua 5.3
+Welcome to LJS DRAFT based on Lua 5.3
 </H1>
 
 <DIV CLASS="menubar">
@@ -45,23 +45,24 @@ Welcome to Lua 5.3
 <A HREF="contents.html">reference manual</A>
 </DIV>
 
-<H2><A NAME="about">About Lua</A></H2>
+<H2><A NAME="about">About LJS</A></H2>
 <P>
-Lua is a powerful, fast, lightweight, embeddable scripting language
+LJS and Lua are a powerful, fast, lightweight, embeddable scripting language
 developed by a
 <A HREF="http://www.lua.org/authors.html">team</A>
 at
 <A HREF="http://www.puc-rio.br/">PUC-Rio</A>,
-the Pontifical Catholic University of Rio de Janeiro in Brazil.
-Lua is
+the Pontifical Catholic University of Rio de Janeiro in Brazil,
+and <A HREF="https://github.com/mingodad">Domingo Alvarez Duarte</A>.
+LJS and LUA are
 <A HREF="#license">free software</A>
 used in many products and projects around the world.
 
 <P>
-Lua's
-<A HREF="http://www.lua.org/">official web site</A>
+LJS's
+<A HREF="https://github.com/mingodad/ljs">official web site</A>
 provides complete information
-about Lua,
+about LJS,
 including
 an
 <A HREF="http://www.lua.org/about.html">executive summary</A>
@@ -74,32 +75,32 @@ which may differ slightly from the
 <A HREF="contents.html">local copy</A>
 distributed in this package.
 
-<H2><A NAME="install">Installing Lua</A></H2>
+<H2><A NAME="install">Installing LJS</A></H2>
 <P>
-Lua is distributed in
-<A HREF="http://www.lua.org/ftp/">source</A>
+LJS is distributed in
+<A HREF="https://github.com/mingodad/ljs">source</A>
 form.
 You need to build it before using it.
-Building Lua should be straightforward
+Building LJS should be straightforward
 because
-Lua is implemented in pure ANSI C and compiles unmodified in all known
+LJS is implemented in pure ANSI C and compiles unmodified in all known
 platforms that have an ANSI C compiler.
-Lua also compiles unmodified as C++.
-The instructions given below for building Lua are for Unix-like platforms.
+LJS also compiles unmodified as C++.
+The instructions given below for building LJS are for Unix-like platforms.
 See also
 <A HREF="#other">instructions for other systems</A>
 and
 <A HREF="#customization">customization options</A>.
 
 <P>
-If you don't have the time or the inclination to compile Lua yourself,
+If you don't have the time or the inclination to compile LJS yourself,
 get a binary from
-<A HREF="http://lua-users.org/wiki/LuaBinaries">LuaBinaries</A>.
+<A HREF="https://github.com/mingodad/ljs">LJSBinaries</A>.
 Try also
-<A HREF="http://luadist.org/">LuaDist</A>,
-a multi-platform distribution of Lua that includes batteries.
+<A HREF="http://luadist.org/">LJSDist</A>,
+a multi-platform distribution of LJS that includes batteries.
 
-<H3>Building Lua</H3>
+<H3>Building LJS</H3>
 <P>
 In most Unix-like platforms, simply do "<KBD>make</KBD>" with a suitable target.
 Here are the details.
@@ -107,7 +108,7 @@ Here are the details.
 <OL>
 <LI>
 Open a terminal window and move to
-the top-level directory, which is named <TT>lua-5.3.5</TT>.
+the top-level directory, which is named <TT>ljs-5.3.5</TT>.
 The <TT>Makefile</TT> there controls both the build process and the installation process.
 <P>
 <LI>
@@ -127,12 +128,12 @@ The <TT>Makefile</TT> there controls both the build process and the installation
 <LI>
 The compilation takes only a few moments
 and produces three files in the <TT>src</TT> directory:
-lua (the interpreter),
-luac (the compiler),
+ljs (the interpreter),
+ljsc (the compiler),
 and liblua.a (the library).
 <P>
 <LI>
-  To check that Lua has been built correctly, do "<KBD>make test</KBD>"
+  To check that LJS has been built correctly, do "<KBD>make test</KBD>"
   after building Lua. This will run the interpreter and print its version.
 </OL>
 <P>
@@ -142,24 +143,24 @@ make sure you have installed the <TT>readline</TT> development package
 If you get link errors after that,
 then try "<KBD>make linux MYLIBS=-ltermcap</KBD>".
 
-<H3>Installing Lua</H3>
+<H3>Installing LJS</H3>
 <P>
-  Once you have built Lua, you may want to install it in an official
+  Once you have built LJS, you may want to install it in an official
   place in your system. In this case, do "<KBD>make install</KBD>". The official
   place and the way to install files are defined in the <TT>Makefile</TT>. You'll
   probably need the right permissions to install files.
 
 <P>
-  To build and install Lua in one step, do "<KBD>make xxx install</KBD>",
+  To build and install LJS in one step, do "<KBD>make xxx install</KBD>",
   where xxx is your platform name.
 
 <P>
-  To install Lua locally, do "<KBD>make local</KBD>".
+  To install LJS locally, do "<KBD>make local</KBD>".
   This will create a directory <TT>install</TT> with subdirectories
   <TT>bin</TT>, <TT>include</TT>, <TT>lib</TT>, <TT>man</TT>, <TT>share</TT>,
-  and install Lua as listed below.
+  and install LJS as listed below.
 
-  To install Lua locally, but in some other directory, do
+  To install LJS locally, but in some other directory, do
   "<KBD>make install INSTALL_TOP=xxx</KBD>", where xxx is your chosen directory.
   The installation starts in the <TT>src</TT> and <TT>doc</TT> directories,
   so take care if <TT>INSTALL_TOP</TT> is not an absolute path.
@@ -168,7 +169,7 @@ then try "<KBD>make linux MYLIBS=-ltermcap</KBD>".
 <DT>
     bin:
 <DD>
-    lua luac
+    ljs ljsc
 <DT>
     include:
 <DD>
@@ -180,23 +181,23 @@ then try "<KBD>make linux MYLIBS=-ltermcap</KBD>".
 <DT>
     man/man1:
 <DD>
-    lua.1 luac.1
+    ljs.1 ljsc.1
 </DL>
 
 <P>
   These are the only directories you need for development.
-  If you only want to run Lua programs,
+  If you only want to run LJS programs,
   you only need the files in <TT>bin</TT> and <TT>man</TT>.
   The files in <TT>include</TT> and <TT>lib</TT> are needed for
-  embedding Lua in C or C++ programs.
+  embedding LJS in C or C++ programs.
 
 <H3><A NAME="customization">Customization</A></H3>
 <P>
   Three kinds of things can be customized by editing a file:
 <UL>
-    <LI> Where and how to install Lua &mdash; edit <TT>Makefile</TT>.
-    <LI> How to build Lua &mdash; edit <TT>src/Makefile</TT>.
-    <LI> Lua features &mdash; edit <TT>src/luaconf.h</TT>.
+    <LI> Where and how to install LJS &mdash; edit <TT>Makefile</TT>.
+    <LI> How to build LJS &mdash; edit <TT>src/Makefile</TT>.
+    <LI> LJS features &mdash; edit <TT>src/luaconf.h</TT>.
 </UL>
 
 <P>
@@ -206,16 +207,16 @@ then try "<KBD>make linux MYLIBS=-ltermcap</KBD>".
   record the changes you've made.
 
 <P>
-  On the other hand, if you need to customize some Lua features, you'll need
-  to edit <TT>src/luaconf.h</TT> before building and installing Lua.
+  On the other hand, if you need to customize some LJS features, you'll need
+  to edit <TT>src/luaconf.h</TT> before building and installing LJS.
   The edited file will be the one installed, and
-  it will be used by any Lua clients that you build, to ensure consistency.
-  Further customization is available to experts by editing the Lua sources.
+  it will be used by any LJS clients that you build, to ensure consistency.
+  Further customization is available to experts by editing the LJS sources.
 
-<H3><A NAME="other">Building Lua on other systems</A></H3>
+<H3><A NAME="other">Building LJS on other systems</A></H3>
 <P>
   If you're not using the usual Unix tools, then the instructions for
-  building Lua depend on the compiler you use. You'll need to create
+  building LJS depend on the compiler you use. You'll need to create
   projects (or whatever your compiler uses) for building the library,
   the interpreter, and the compiler, as follows:
 
@@ -239,20 +240,20 @@ compiler:
 </DL>
 
 <P>
-  To use Lua as a library in your own programs you'll need to know how to
+  To use LJS as a library in your own programs you'll need to know how to
   create and use libraries with your compiler. Moreover, to dynamically load
-  C libraries for Lua you'll need to know how to create dynamic libraries
-  and you'll need to make sure that the Lua API functions are accessible to
-  those dynamic libraries &mdash; but <EM>don't</EM> link the Lua library
-  into each dynamic library. For Unix, we recommend that the Lua library
+  C libraries for LJS you'll need to know how to create dynamic libraries
+  and you'll need to make sure that the LJS API functions are accessible to
+  those dynamic libraries &mdash; but <EM>don't</EM> link the LJS library
+  into each dynamic library. For Unix, we recommend that the LJS library
   be linked statically into the host program and its symbols exported for
-  dynamic linking; <TT>src/Makefile</TT> does this for the Lua interpreter.
-  For Windows, we recommend that the Lua library be a DLL.
-  In all cases, the compiler luac should be linked statically.
+  dynamic linking; <TT>src/Makefile</TT> does this for the LJS interpreter.
+  For Windows, we recommend that the LJS library be a DLL.
+  In all cases, the compiler ljsc should be linked statically.
 
 <P>
   As mentioned above, you may edit <TT>src/luaconf.h</TT> to customize
-  some features before building Lua.
+  some features before building LJS.
 
 <H2><A NAME="changes">Changes since Lua 5.2</A></H2>
 <P>
@@ -355,10 +356,10 @@ THE SOFTWARE.
 
 <P CLASS="footer">
 Last update:
-Mon Jun 18 22:57:33 -03 2018
+Mon Nov 26 10:12 2018
 </P>
 <!--
-Last change: revised for Lua 5.3.5
+Last change: revised for LJS 5.3.5
 -->
 
 </BODY>

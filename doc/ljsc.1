@@ -1,18 +1,18 @@
-.\" $Id: luac.man,v 1.29 2011/11/16 13:53:40 lhf Exp $
-.TH LUAC 1 "$Date: 2011/11/16 13:53:40 $"
+.\" $Id: ljsc.man,v 1.29 2011/11/16 13:53:40 lhf Exp $
+.TH LJSC 1 "$Date: 2011/11/16 13:53:40 $"
 .SH NAME
-luac \- Lua compiler
+ljsc \- LJS compiler
 .SH SYNOPSIS
-.B luac
+.B ljsc
 [
 .I options
 ] [
 .I filenames
 ]
 .SH DESCRIPTION
-.B luac
-is the Lua compiler.
-It translates programs written in the Lua programming language
+.B ljsc
+is the LJS compiler.
+It translates programs written in the LJS programming language
 into binary files containing precompiled chunks
 that can be later loaded and executed.
 .LP
@@ -22,23 +22,23 @@ protecting source code from accidental user changes,
 and
 off-line syntax checking.
 Precompiling does not imply faster execution
-because in Lua chunks are always compiled into bytecodes before being executed.
-.B luac
+because in LJS chunks are always compiled into bytecodes before being executed.
+.B ljsc
 simply allows those bytecodes to be saved in a file for later execution.
 Precompiled chunks are not necessarily smaller than the corresponding source.
 The main goal in precompiling is faster loading.
 .LP
 In the command line,
 you can mix
-text files containing Lua source and
+text files containing LJS source and
 binary files containing precompiled chunks.
-.B luac
+.B ljsc
 produces a single output file containing the combined bytecodes
 for all files given.
 Executing the combined file is equivalent to executing the given files.
 By default,
 the output file is named
-.BR luac.out ,
+.BR ljsc.out ,
 but you can change this with the
 .B \-o
 option.
@@ -48,18 +48,18 @@ Precompiled chunks are
 portable across different architectures.
 Moreover,
 the internal format of precompiled chunks
-is likely to change when a new version of Lua is released.
-Make sure you save the source files of all Lua programs that you precompile.
+is likely to change when a new version of LJS is released.
+Make sure you save the source files of all LJS programs that you precompile.
 .LP
 .SH OPTIONS
 .TP
 .B \-l
-produce a listing of the compiled bytecode for Lua's virtual machine.
-Listing bytecodes is useful to learn about Lua's virtual machine.
+produce a listing of the compiled bytecode for LJS's virtual machine.
+Listing bytecodes is useful to learn about LJS's virtual machine.
 If no files are given, then
-.B luac
+.B ljsc
 loads
-.B luac.out
+.B ljsc.out
 and lists its contents.
 Use
 .B \-l \-l
@@ -69,7 +69,7 @@ for a full listing.
 output to
 .IR file ,
 instead of the default
-.BR luac.out .
+.BR ljsc.out .
 (You can use
 .B "'\-'"
 for standard output,
@@ -83,9 +83,9 @@ load files but do not generate any output file.
 Used mainly for syntax checking and for testing precompiled chunks:
 corrupted files will probably generate errors when loaded.
 If no files are given, then
-.B luac
+.B ljsc
 loads
-.B luac.out
+.B ljsc.out
 and tests its contents.
 No messages are displayed if the file loads without errors.
 .TP
@@ -106,7 +106,7 @@ stop handling options.
 .B \-
 stop handling options and process standard input.
 .SH "SEE ALSO"
-.BR lua (1)
+.BR ljs (1)
 .br
 The documentation at lua.org.
 .SH DIAGNOSTICS
@@ -114,5 +114,6 @@ Error messages should be self explanatory.
 .SH AUTHORS
 R. Ierusalimschy,
 L. H. de Figueiredo,
-W. Celes
+W. Celes,
+Domingo Alvarez Duarte
 .\" EOF

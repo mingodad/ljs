@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>Lua 5.3 Reference Manual</TITLE>
+<TITLE>LJS based on Lua 5.3 Reference Manual</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="lua.css">
 <LINK REL="stylesheet" TYPE="text/css" HREF="manual.css">
 <META HTTP-EQUIV="content-type" CONTENT="text/html; charset=iso-8859-1">
@@ -11,11 +11,11 @@
 
 <H1>
 <A HREF="http://www.lua.org/"><IMG SRC="logo.gif" ALT="Lua"></A>
-Lua 5.3 Reference Manual
+LJS DRAFT based on Lua 5.3 Reference Manual
 </H1>
 
 <P>
-by Roberto Ierusalimschy, Luiz Henrique de Figueiredo, Waldemar Celes
+by Roberto Ierusalimschy, Luiz Henrique de Figueiredo, Waldemar Celes, Domingo Alvarez Duarte
 
 <P>
 <SMALL>
@@ -43,16 +43,16 @@ Freely available under the terms of the
 <h1>1 &ndash; <a name="1">Introduction</a></h1>
 
 <p>
-Lua is a powerful, efficient, lightweight, embeddable scripting language.
+LJS is a powerful, efficient, lightweight, embeddable scripting language.
 It supports procedural programming,
 object-oriented programming, functional programming,
 data-driven programming, and data description.
 
 
 <p>
-Lua combines simple procedural syntax with powerful data description
+LJS combines simple procedural syntax with powerful data description
 constructs based on associative arrays and extensible semantics.
-Lua is dynamically typed,
+LJS is dynamically typed,
 runs by interpreting bytecode with a register-based
 virtual machine,
 and has automatic memory management with
@@ -62,36 +62,36 @@ and rapid prototyping.
 
 
 <p>
-Lua is implemented as a library, written in <em>clean C</em>,
+LJS is implemented as a library, written in <em>clean C</em>,
 the common subset of Standard&nbsp;C and C++.
-The Lua distribution includes a host program called <code>lua</code>,
+The LJS distribution includes a host program called <code>ljs</code>,
 which uses the Lua library to offer a complete,
-standalone Lua interpreter,
+standalone LJS interpreter,
 for interactive or batch use.
-Lua is intended to be used both as a powerful, lightweight,
+LJS is intended to be used both as a powerful, lightweight,
 embeddable scripting language for any program that needs one,
 and as a powerful but lightweight and efficient stand-alone language.
 
 
 <p>
-As an extension language, Lua has no notion of a "main" program:
+As an extension language, LJS has no notion of a "main" program:
 it works <em>embedded</em> in a host client,
 called the <em>embedding program</em> or simply the <em>host</em>.
-(Frequently, this host is the stand-alone <code>lua</code> program.)
-The host program can invoke functions to execute a piece of Lua code,
-can write and read Lua variables,
-and can register C&nbsp;functions to be called by Lua code.
-Through the use of C&nbsp;functions, Lua can be augmented to cope with
+(Frequently, this host is the stand-alone <code>ljs</code> program.)
+The host program can invoke functions to execute a piece of LJS code,
+can write and read LJS variables,
+and can register C&nbsp;functions to be called by LJS code.
+Through the use of C&nbsp;functions, LJS can be augmented to cope with
 a wide range of different domains,
 thus creating customized programming languages sharing a syntactical framework.
 
 
 <p>
-Lua is free software,
+LJS is free software,
 and is provided as usual with no guarantees,
 as stated in its license.
 The implementation described in this manual is available
-at Lua's official web site, <code>www.lua.org</code>.
+at LJS's official web site, <code>github.com/mingodad/ljs</code>.
 
 
 <p>
@@ -114,38 +114,40 @@ This section describes the basic concepts of the language.
 <h2>2.1 &ndash; <a name="2.1">Values and Types</a></h2>
 
 <p>
-Lua is a <em>dynamically typed language</em>.
+LJS is a <em>dynamically typed language</em>.
 This means that
 variables do not have types; only values do.
-There are no type definitions in the language.
+There are no type definitions in the language
+(but you can anottate variables with types like in typescript).
 All values carry their own type.
 
 
 <p>
-All values in Lua are <em>first-class values</em>.
+All values in LJS are <em>first-class values</em>.
 This means that all values can be stored in variables,
 passed as arguments to other functions, and returned as results.
 
 
 <p>
-There are eight basic types in Lua:
-<em>nil</em>, <em>boolean</em>, <em>number</em>,
+There are eight basic types in LJS:
+<em>null</em>, <em>boolean</em>, <em>number</em>,
 <em>string</em>, <em>function</em>, <em>userdata</em>,
-<em>thread</em>, and <em>table</em>.
-The type <em>nil</em> has one single value, <b>nil</b>,
+<em>thread</em>, and <em>table</em>
+(also a subset of table called <em>array</em>).
+The type <em>null</em> has one single value, <b>null</b>,
 whose main property is to be different from any other value;
 it usually represents the absence of a useful value.
 The type <em>boolean</em> has two values, <b>false</b> and <b>true</b>.
-Both <b>nil</b> and <b>false</b> make a condition false;
+Both <b>null</b> and <b>false</b> make a condition false;
 any other value makes it true.
 The type <em>number</em> represents both
 integer numbers and real (floating-point) numbers.
 The type <em>string</em> represents immutable sequences of bytes.
 
-Lua is 8-bit clean:
+LJS is 8-bit clean:
 strings can contain any 8-bit value,
 including embedded zeros ('<code>\0</code>').
-Lua is also encoding-agnostic;
+LJS is also encoding-agnostic;
 it makes no assumptions about the contents of a string.
 
 
@@ -153,14 +155,14 @@ it makes no assumptions about the contents of a string.
 The type <em>number</em> uses two internal representations,
 or two subtypes,
 one called <em>integer</em> and the other called <em>float</em>.
-Lua has explicit rules about when each representation is used,
+LJS has explicit rules about when each representation is used,
 but it also converts between them automatically as needed (see <a href="#3.4.3">&sect;3.4.3</a>).
 Therefore,
 the programmer may choose to mostly ignore the difference
 between integers and floats
 or to assume complete control over the representation of each number.
-Standard Lua uses 64-bit integers and double-precision (64-bit) floats,
-but you can also compile Lua so that it
+Standard LJS uses 64-bit integers and double-precision (64-bit) floats,
+but you can also compile LJS so that it
 uses 32-bit integers and/or single-precision (32-bit) floats.
 The option with 32 bits for both integers and floats
 is particularly attractive
@@ -169,26 +171,26 @@ for small machines and embedded systems.
 
 
 <p>
-Lua can call (and manipulate) functions written in Lua and
+LJS can call (and manipulate) functions written in LJS and
 functions written in C (see <a href="#3.4.10">&sect;3.4.10</a>).
 Both are represented by the type <em>function</em>.
 
 
 <p>
 The type <em>userdata</em> is provided to allow arbitrary C&nbsp;data to
-be stored in Lua variables.
+be stored in LJS variables.
 A userdata value represents a block of raw memory.
 There are two kinds of userdata:
 <em>full userdata</em>,
-which is an object with a block of memory managed by Lua,
+which is an object with a block of memory managed by LJS,
 and <em>light userdata</em>,
 which is simply a C&nbsp;pointer value.
-Userdata has no predefined operations in Lua,
+Userdata has no predefined operations in LJS,
 except assignment and identity test.
 By using <em>metatables</em>,
 the programmer can define operations for full userdata values
 (see <a href="#2.4">&sect;2.4</a>).
-Userdata values cannot be created or modified in Lua,
+Userdata values cannot be created or modified in LJS,
 only through the C&nbsp;API.
 This guarantees the integrity of data owned by the host program.
 
@@ -196,32 +198,32 @@ This guarantees the integrity of data owned by the host program.
 <p>
 The type <em>thread</em> represents independent threads of execution
 and it is used to implement coroutines (see <a href="#2.6">&sect;2.6</a>).
-Lua threads are not related to operating-system threads.
-Lua supports coroutines on all systems,
+LJS threads are not related to operating-system threads.
+LJS supports coroutines on all systems,
 even those that do not support threads natively.
 
 
 <p>
 The type <em>table</em> implements associative arrays,
 that is, arrays that can have as indices not only numbers,
-but any Lua value except <b>nil</b> and NaN.
+but any LJS value except <b>null</b> and NaN.
 (<em>Not a Number</em> is a special value used to represent
 undefined or unrepresentable numerical results, such as <code>0/0</code>.)
 Tables can be <em>heterogeneous</em>;
-that is, they can contain values of all types (except <b>nil</b>).
-Any key with value <b>nil</b> is not considered part of the table.
+that is, they can contain values of all types (except <b>null</b>).
+Any key with value <b>null</b> is not considered part of the table.
 Conversely, any key that is not part of a table has
-an associated value <b>nil</b>.
+an associated value <b>null</b>.
 
 
 <p>
-Tables are the sole data-structuring mechanism in Lua;
+Tables are the sole data-structuring mechanism in LJS;
 they can be used to represent ordinary arrays, lists,
 symbol tables, sets, records, graphs, trees, etc.
-To represent records, Lua uses the field name as an index.
+To represent records, LJS uses the field name as an index.
 The language supports this representation by
 providing <code>a.name</code> as syntactic sugar for <code>a["name"]</code>.
-There are several convenient ways to create tables in Lua
+There are several convenient ways to create tables in LJS
 (see <a href="#3.4.9">&sect;3.4.9</a>).
 
 
@@ -251,7 +253,7 @@ For instance, if you write <code>a[2.0] = true</code>,
 the actual key inserted into the table will be the
 integer <code>2</code>.
 (On the other hand,
-2 and "<code>2</code>" are different Lua values and therefore
+2 and "<code>2</code>" are different LJS values and therefore
 denote different table entries.)
 
 
@@ -262,6 +264,9 @@ only <em>references</em> to them.
 Assignment, parameter passing, and function returns
 always manipulate references to such values;
 these operations do not imply any kind of copy.
+
+<p>
+In LJS there is also a syntatic sugar for arrays as subset of tables.
 
 
 <p>
@@ -292,7 +297,7 @@ In particular,
 you can define new variables and parameters with that name.
 Each reference to a free name uses the <code>_ENV</code> that is
 visible at that point in the program,
-following the usual visibility rules of Lua (see <a href="#3.5">&sect;3.5</a>).
+following the usual visibility rules of LJS (see <a href="#3.5">&sect;3.5</a>).
 
 
 <p>
@@ -300,18 +305,18 @@ Any table used as the value of <code>_ENV</code> is called an <em>environment</e
 
 
 <p>
-Lua keeps a distinguished environment called the <em>global environment</em>.
+LJS keeps a distinguished environment called the <em>global environment</em>.
 This value is kept at a special index in the C registry (see <a href="#4.5">&sect;4.5</a>).
-In Lua, the global variable <a href="#pdf-_G"><code>_G</code></a> is initialized with this same value.
+In LJS, the global variable <a href="#pdf-_G"><code>_G</code></a> is initialized with this same value.
 (<a href="#pdf-_G"><code>_G</code></a> is never used internally.)
 
 
 <p>
-When Lua loads a chunk,
+When LJS loads a chunk,
 the default value for its <code>_ENV</code> upvalue
 is the global environment (see <a href="#pdf-load"><code>load</code></a>).
 Therefore, by default,
-free names in Lua code refer to entries in the global environment
+free names in LJS code refer to entries in the global environment
 (and, therefore, they are also called <em>global variables</em>).
 Moreover, all standard libraries are loaded in the global environment
 and some functions there operate on that environment.
@@ -327,22 +332,22 @@ of its first upvalue.)
 <h2>2.3 &ndash; <a name="2.3">Error Handling</a></h2>
 
 <p>
-Because Lua is an embedded extension language,
-all Lua actions start from C&nbsp;code in the host program
+Because LJS is an embedded extension language,
+all LJS actions start from C&nbsp;code in the host program
 calling a function from the Lua library.
-(When you use Lua standalone,
-the <code>lua</code> application is the host program.)
+(When you use LJS standalone,
+the <code>ljs</code> application is the host program.)
 Whenever an error occurs during
-the compilation or execution of a Lua chunk,
+the compilation or execution of a LJS chunk,
 control returns to the host,
 which can take appropriate measures
 (such as printing an error message).
 
 
 <p>
-Lua code can explicitly generate an error by calling the
+LJS code can explicitly generate an error by calling the
 <a href="#pdf-error"><code>error</code></a> function.
-If you need to catch errors in Lua,
+If you need to catch errors in LJS,
 you can use <a href="#pdf-pcall"><code>pcall</code></a> or <a href="#pdf-xpcall"><code>xpcall</code></a>
 to call a given function in <em>protected mode</em>.
 
@@ -351,7 +356,7 @@ to call a given function in <em>protected mode</em>.
 Whenever there is an error,
 an <em>error object</em> (also called an <em>error message</em>)
 is propagated with information about the error.
-Lua itself only generates errors whose error object is a string,
+LJS itself only generates errors whose error object is a string,
 but programs may generate errors with
 any value as the error object.
 It is up to the Lua program or its host to handle such error objects.
@@ -370,7 +375,7 @@ This message handler is still protected by the protected call;
 so, an error inside the message handler
 will call the message handler again.
 If this loop goes on for too long,
-Lua breaks it and returns an appropriate message.
+LJS breaks it and returns an appropriate message.
 (The message handler is called only for regular runtime errors.
 It is not called for memory-allocation errors
 nor for errors while running finalizers.)
@@ -382,16 +387,16 @@ nor for errors while running finalizers.)
 <h2>2.4 &ndash; <a name="2.4">Metatables and Metamethods</a></h2>
 
 <p>
-Every value in Lua can have a <em>metatable</em>.
-This <em>metatable</em> is an ordinary Lua table
+Every value in LJS can have a <em>metatable</em>.
+This <em>metatable</em> is an ordinary LJS table
 that defines the behavior of the original value
 under certain special operations.
 You can change several aspects of the behavior
 of operations over a value by setting specific fields in its metatable.
 For instance, when a non-numeric value is the operand of an addition,
-Lua checks for a function in the field "<code>__add</code>" of the value's metatable.
+LJS checks for a function in the field "<code>__add</code>" of the value's metatable.
 If it finds one,
-Lua calls this function to perform the addition.
+LJS calls this function to perform the addition.
 
 
 <p>
@@ -407,7 +412,7 @@ metamethods should be function values.
 <p>
 You can query the metatable of any value
 using the <a href="#pdf-getmetatable"><code>getmetatable</code></a> function.
-Lua queries metamethods in metatables using a raw access (see <a href="#pdf-rawget"><code>rawget</code></a>).
+LJS queries metamethods in metatables using a raw access (see <a href="#pdf-rawget"><code>rawget</code></a>).
 So, to retrieve the metamethod for event <code>ev</code> in object <code>o</code>,
 Lua does the equivalent to the following code:
 
@@ -418,7 +423,7 @@ Lua does the equivalent to the following code:
 <p>
 You can replace the metatable of tables
 using the <a href="#pdf-setmetatable"><code>setmetatable</code></a> function.
-You cannot change the metatable of other types from Lua code
+You cannot change the metatable of other types from LJS code
 (except by using the debug library (<a href="#6.10">&sect;6.10</a>));
 you should use the C&nbsp;API for that.
 
@@ -445,7 +450,7 @@ when a userdata or a table is garbage collected (<a href="#2.5">&sect;2.5</a>).
 For the unary operators (negation, length, and bitwise NOT),
 the metamethod is computed and called with a dummy second operand,
 equal to the first one.
-This extra operand is only to simplify Lua's internals
+This extra operand is only to simplify LJS's internals
 (by making these operators behave like a binary operation)
 and may be removed in future versions.
 (For most uses this extra operand is irrelevant.)
@@ -463,10 +468,10 @@ Each operation is identified by its corresponding key.
 the addition (<code>+</code>) operation.
 If any operand for an addition is not a number
 (nor a string coercible to a number),
-Lua will try to call a metamethod.
-First, Lua will check the first operand (even if it is valid).
+LJS will try to call a metamethod.
+First, LJS will check the first operand (even if it is valid).
 If that operand does not define a metamethod for <code>__add</code>,
-then Lua will check the second operand.
+then LJS will check the second operand.
 If Lua can find a metamethod,
 it calls the metamethod with the two operands as arguments,
 and the result of the call
@@ -497,7 +502,7 @@ Behavior similar to the addition operation.
 </li>
 
 <li><b><code>__pow</code>: </b>
-the exponentiation (<code>^</code>) operation.
+the exponentiation (<code>**</code>) operation.
 Behavior similar to the addition operation.
 </li>
 
@@ -507,7 +512,7 @@ Behavior similar to the addition operation.
 </li>
 
 <li><b><code>__idiv</code>: </b>
-the floor division (<code>//</code>) operation.
+the floor division (<code>idiv?</code>) operation.
 Behavior similar to the addition operation.
 </li>
 
@@ -525,7 +530,7 @@ Behavior similar to the bitwise AND operation.
 </li>
 
 <li><b><code>__bxor</code>: </b>
-the bitwise exclusive OR (binary <code>~</code>) operation.
+the bitwise exclusive OR (binary <code>^</code>) operation.
 Behavior similar to the bitwise AND operation.
 </li>
 
@@ -547,7 +552,7 @@ Behavior similar to the bitwise AND operation.
 <li><b><code>__concat</code>: </b>
 the concatenation (<code>..</code>) operation.
 Behavior similar to the addition operation,
-except that Lua will try a metamethod
+except that LJS will try a metamethod
 if any operand is neither a string nor a number
 (which is always coercible to a string).
 </li>
@@ -555,21 +560,21 @@ if any operand is neither a string nor a number
 <li><b><code>__len</code>: </b>
 the length (<code>#</code>) operation.
 If the object is not a string,
-Lua will try its metamethod.
+LJS will try its metamethod.
 If there is a metamethod,
-Lua calls it with the object as argument,
+LJS calls it with the object as argument,
 and the result of the call
 (always adjusted to one value)
 is the result of the operation.
 If there is no metamethod but the object is a table,
-then Lua uses the table length operation (see <a href="#3.4.7">&sect;3.4.7</a>).
-Otherwise, Lua raises an error.
+then LJS uses the table length operation (see <a href="#3.4.7">&sect;3.4.7</a>).
+Otherwise, LJS raises an error.
 </li>
 
 <li><b><code>__eq</code>: </b>
 the equal (<code>==</code>) operation.
 Behavior similar to the addition operation,
-except that Lua will try a metamethod only when the values
+except that LJS will try a metamethod only when the values
 being compared are either both tables or both full userdata
 and they are not primitively equal.
 The result of the call is always converted to a boolean.
@@ -587,7 +592,7 @@ The result of the call is always converted to a boolean.
 the less equal (<code>&lt;=</code>) operation.
 Unlike other operations,
 the less-equal operation can use two different events.
-First, Lua looks for the <code>__le</code> metamethod in both operands,
+First, LJS looks for the <code>__le</code> metamethod in both operands,
 like in the less than operation.
 If it cannot find such a metamethod,
 then it will try the <code>__lt</code> metamethod,
@@ -633,7 +638,7 @@ the metamethod for this event can be either a function or a table.
 If it is a function,
 it is called with <code>table</code>, <code>key</code>, and <code>value</code> as arguments.
 If it is a table,
-Lua does an indexing assignment to this table with the same key and value.
+LJS does an indexing assignment to this table with the same key and value.
 (This assignment is regular, not raw,
 and therefore can trigger another metamethod.)
 
@@ -648,7 +653,7 @@ to do the assignment.)
 
 <li><b><code>__call</code>: </b>
 The call operation <code>func(args)</code>.
-This event happens when Lua tries to call a non-function value
+This event happens when LJS tries to call a non-function value
 (that is, <code>func</code> is not a function).
 The metamethod is looked up in <code>func</code>.
 If present,
@@ -683,19 +688,19 @@ use other fields in metatables for their own purposes.
 <h2>2.5 &ndash; <a name="2.5">Garbage Collection</a></h2>
 
 <p>
-Lua performs automatic memory management.
+LJS performs automatic memory management.
 This means that
 you do not have to worry about allocating memory for new objects
 or freeing it when the objects are no longer needed.
-Lua manages memory automatically by running
+LJS manages memory automatically by running
 a <em>garbage collector</em> to collect all <em>dead objects</em>
-(that is, objects that are no longer accessible from Lua).
-All memory used by Lua is subject to automatic management:
+(that is, objects that are no longer accessible from LJS).
+All memory used by LJS is subject to automatic management:
 strings, tables, userdata, functions, threads, internal structures, etc.
 
 
 <p>
-Lua implements an incremental mark-and-sweep collector.
+LJS implements an incremental mark-and-sweep collector.
 It uses two numbers to control its garbage-collection cycles:
 the <em>garbage-collector pause</em> and
 the <em>garbage-collector step multiplier</em>.
@@ -734,13 +739,13 @@ bytes that the program may use),
 the collector behaves like a stop-the-world collector.
 If you then set the pause to 200,
 the collector behaves as in old Lua versions,
-doing a complete collection every time Lua doubles its
+doing a complete collection every time LJS doubles its
 memory usage.
 
 
 <p>
 You can change these numbers by calling <a href="#lua_gc"><code>lua_gc</code></a> in C
-or <a href="#pdf-collectgarbage"><code>collectgarbage</code></a> in Lua.
+or <a href="#pdf-collectgarbage"><code>collectgarbage</code></a> in LJS.
 You can also use these functions to control
 the collector directly (e.g., stop and restart it).
 
@@ -905,9 +910,9 @@ it may not be properly cleared until the next cycle.
 <h2>2.6 &ndash; <a name="2.6">Coroutines</a></h2>
 
 <p>
-Lua supports coroutines,
+LJS supports coroutines,
 also called <em>collaborative multithreading</em>.
-A coroutine in Lua represents an independent thread of execution.
+A coroutine in LJS represents an independent thread of execution.
 Unlike threads in multithread systems, however,
 a coroutine only suspends its execution by explicitly calling
 a yield function.
@@ -981,24 +986,24 @@ As an example of how coroutines work,
 consider the following code:
 
 <pre>
-     function foo (a)
-       print("foo", a)
-       return coroutine.yield(2*a)
-     end
+     function foo (a) {
+       print("foo", a);
+       return coroutine.yield(2*a);
+     }
      
-     co = coroutine.create(function (a,b)
-           print("co-body", a, b)
-           local r = foo(a+1)
-           print("co-body", r)
-           local r, s = coroutine.yield(a+b, a-b)
-           print("co-body", r, s)
-           return b, "end"
-     end)
+     co = coroutine.create(function (a,b) {
+           print("co-body", a, b);
+           local r = foo(a+1);
+           print("co-body", r);
+           local r, s = coroutine.yield(a+b, a-b);
+           print("co-body", r, s);
+           return b, "end";
+     });
      
-     print("main", coroutine.resume(co, 1, 10))
-     print("main", coroutine.resume(co, "r"))
-     print("main", coroutine.resume(co, "x", "y"))
-     print("main", coroutine.resume(co, "x", "y"))
+     print("main", coroutine.resume(co, 1, 10));
+     print("main", coroutine.resume(co, "r"));
+     print("main", coroutine.resume(co, "x", "y"));
+     print("main", coroutine.resume(co, "x", "y"));
 </pre><p>
 When you run it, it produces the following output:
 
@@ -1025,7 +1030,7 @@ and <a href="#lua_yield"><code>lua_yield</code></a>.
 <h1>3 &ndash; <a name="3">The Language</a></h1>
 
 <p>
-This section describes the lexis, the syntax, and the semantics of Lua.
+This section describes the lexis, the syntax, and the semantics of LJS.
 In other words,
 this section describes
 which tokens are valid,
@@ -1041,7 +1046,7 @@ in which
 Non-terminals are shown like non-terminal,
 keywords are shown like <b>kword</b>,
 and other terminal symbols are shown like &lsquo;<b>=</b>&rsquo;.
-The complete syntax of Lua can be found in <a href="#9">&sect;9</a>
+The complete syntax of LJS can be found in <a href="#9">&sect;9</a>
 at the end of this manual.
 
 
@@ -1049,7 +1054,7 @@ at the end of this manual.
 <h2>3.1 &ndash; <a name="3.1">Lexical Conventions</a></h2>
 
 <p>
-Lua is a free-form language.
+LJS is a free-form language.
 It ignores spaces (including new lines) and comments
 between lexical elements (tokens),
 except as delimiters between names and keywords.
@@ -1058,7 +1063,7 @@ except as delimiters between names and keywords.
 <p>
 <em>Names</em>
 (also called <em>identifiers</em>)
-in Lua can be any string of letters,
+in LJS can be any string of letters,
 digits, and underscores,
 not beginning with a digit and
 not being a reserved word.
@@ -1071,15 +1076,15 @@ and cannot be used as names:
 
 
 <pre>
-     and       break     do        else      elseif    end
+     break    continue            do       else
      false     for       function  goto      if        in
-     local     nil       not       or        repeat    return
-     then      true      until     while
+     null      return
+     true      var      while
 </pre>
 
 <p>
-Lua is a case-sensitive language:
-<code>and</code> is a reserved word, but <code>And</code> and <code>AND</code>
+LJS is a case-sensitive language:
+<code>var</code> is a reserved word, but <code>Var</code> and <code>VAR</code>
 are two different, valid names.
 As a convention,
 programs should avoid creating
@@ -1093,8 +1098,10 @@ The following strings denote other tokens:
 <pre>
      +     -     *     /     %     ^     #
      &amp;     ~     |     &lt;&lt;    &gt;&gt;    //
-     ==    ~=    &lt;=    &gt;=    &lt;     &gt;     =
-     (     )     {     }     [     ]     ::
+     ==    !=    &lt;=    &gt;=    &lt;     &gt;     =
+     +=    -=    *=    /=    %=
+     &amp;&amp;    ||    ! **
+     (     )     {     }     [     ]     ::   ->
      ;     :     ,     .     ..    ...
 </pre>
 
@@ -1151,13 +1158,14 @@ enclosed by <em>long brackets</em>.
 We define an <em>opening long bracket of level <em>n</em></em> as an opening
 square bracket followed by <em>n</em> equal signs followed by another
 opening square bracket.
-So, an opening long bracket of level&nbsp;0 is written as <code>[[</code>, 
-an opening long bracket of level&nbsp;1 is written as <code>[=[</code>, 
+<em>The minimum level of 1 is mandatory (to disambiguate from array declarations)</em>.
+So, an opening long bracket of level&nbsp;1 is written as <code>[=[</code>, 
+an opening long bracket of level&nbsp;2 is written as <code>[==[</code>, 
 and so on.
 A <em>closing long bracket</em> is defined similarly;
 for instance,
 a closing long bracket of level&nbsp;4 is written as  <code>]====]</code>.
-A <em>long literal</em> starts with an opening long bracket of any level and
+A <em>long literal</em> starts with an opening long bracket of any level bigger or equal 1 and
 ends at the first closing long bracket of the same level.
 It can contain any text except a closing bracket of the same level.
 Literals in this bracketed form can run for several lines,
@@ -1179,20 +1187,20 @@ newline is coded as&nbsp;10, and '<code>1</code>' is coded as&nbsp;49),
 the five literal strings below denote the same string:
 
 <pre>
-     a = 'alo\n123"'
-     a = "alo\n123\""
-     a = '\97lo\10\04923"'
-     a = [[alo
-     123"]]
+     a = 'alo\n123"';
+     a = "alo\n123\"";
+     a = '\97lo\10\04923"';
+     a = [=[alo
+     123"]=];
      a = [==[
      alo
-     123"]==]
+     123"]==];
 </pre>
 
 <p>
 Any byte in a literal string not
 explicitly affected by the previous rules represents itself.
-However, Lua opens files for parsing in text mode,
+However, LJS opens files for parsing in text mode,
 and the system file functions may have problems with
 some control characters.
 So, it is safer to represent
@@ -1205,7 +1213,7 @@ A <em>numeric constant</em> (or <em>numeral</em>)
 can be written with an optional fractional part
 and an optional decimal exponent,
 marked by a letter '<code>e</code>' or '<code>E</code>'.
-Lua also accepts hexadecimal constants,
+LJS also accepts hexadecimal constants,
 which start with <code>0x</code> or <code>0X</code>.
 Hexadecimal constants also accept an optional fractional part
 plus an optional binary exponent,
@@ -1228,24 +1236,18 @@ Examples of valid float constants are
 </pre>
 
 <p>
-A <em>comment</em> starts with a double hyphen (<code>--</code>)
-anywhere outside a string.
-If the text immediately after <code>--</code> is not an opening long bracket,
-the comment is a <em>short comment</em>,
-which runs until the end of the line.
-Otherwise, it is a <em>long comment</em>,
-which runs until the corresponding closing long bracket.
+A <em>short comment</em> starts with (<code>//</code>)
+anywhere outside a string and ends on the next new line.
+A <em>long comment</em> starts with  (<code>/*</code>)
+anywhere outside a string and ends when found a closing (<code>*/</code>).
 Long comments are frequently used to disable code temporarily.
-
-
-
 
 
 <h2>3.2 &ndash; <a name="3.2">Variables</a></h2>
 
 <p>
 Variables are places that store values.
-There are three kinds of variables in Lua:
+There are three kinds of variables in LJS:
 global variables, local variables, and table fields.
 
 
@@ -1269,7 +1271,7 @@ defined inside their scope (see <a href="#3.5">&sect;3.5</a>).
 
 
 <p>
-Before the first assignment to a variable, its value is <b>nil</b>.
+Before the first assignment to a variable, its value is <b>null</b>.
 
 
 <p>
@@ -1303,7 +1305,7 @@ Due to the way that chunks are compiled,
 <h2>3.3 &ndash; <a name="3.3">Statements</a></h2>
 
 <p>
-Lua supports an almost conventional set of statements,
+LJS supports an almost conventional set of statements,
 similar to those in Pascal or C.
 This set includes
 assignments, control structures, function calls,
@@ -1320,7 +1322,7 @@ which are executed sequentially:
 <pre>
 	block ::= {stat}
 </pre><p>
-Lua has <em>empty statements</em>
+LJS has <em>empty statements</em>
 that allow you to separate statements with semicolons,
 start a block with a semicolon
 or write two semicolons in sequence:
@@ -1332,7 +1334,7 @@ or write two semicolons in sequence:
 <p>
 Function calls and assignments
 can start with an open parenthesis.
-This possibility leads to an ambiguity in Lua's grammar.
+This possibility leads to an ambiguity in LJS's grammar.
 Consider the following fragment:
 
 <pre>
@@ -1362,7 +1364,7 @@ statements that start with a parenthesis:
 A block can be explicitly delimited to produce a single statement:
 
 <pre>
-	stat ::= <b>do</b> block <b>end</b>
+	stat ::= <b>{</b> block <b>}</b>
 </pre><p>
 Explicit blocks are useful
 to control the scope of variable declarations.
@@ -1377,7 +1379,7 @@ of another block (see <a href="#3.3.4">&sect;3.3.4</a>).
 <h3>3.3.2 &ndash; <a name="3.3.2">Chunks</a></h3>
 
 <p>
-The unit of compilation of Lua is called a <em>chunk</em>.
+The unit of compilation of LJS is called a <em>chunk</em>.
 Syntactically,
 a chunk is simply a block:
 
@@ -1386,7 +1388,7 @@ a chunk is simply a block:
 </pre>
 
 <p>
-Lua handles a chunk as the body of an anonymous function
+LJS handles a chunk as the body of an anonymous function
 with a variable number of arguments
 (see <a href="#3.4.11">&sect;3.4.11</a>).
 As such, chunks can define local variables,
@@ -1400,17 +1402,17 @@ even if it does not use that variable.
 <p>
 A chunk can be stored in a file or in a string inside the host program.
 To execute a chunk,
-Lua first <em>loads</em> it,
+LJS first <em>loads</em> it,
 precompiling the chunk's code into instructions for a virtual machine,
-and then Lua executes the compiled code
+and then LJS executes the compiled code
 with an interpreter for the virtual machine.
 
 
 <p>
 Chunks can also be precompiled into binary form;
-see program <code>luac</code> and function <a href="#pdf-string.dump"><code>string.dump</code></a> for details.
+see program <code>ljsc</code> and function <a href="#pdf-string.dump"><code>string.dump</code></a> for details.
 Programs in source and compiled forms are interchangeable;
-Lua automatically detects the file type and acts accordingly (see <a href="#pdf-load"><code>load</code></a>).
+LJS automatically detects the file type and acts accordingly (see <a href="#pdf-load"><code>load</code></a>).
 
 
 
@@ -1419,7 +1421,10 @@ Lua automatically detects the file type and acts accordingly (see <a href="#pdf-
 <h3>3.3.3 &ndash; <a name="3.3.3">Assignment</a></h3>
 
 <p>
-Lua allows multiple assignments.
+<em>!!! C/C++/Java/Javascript programmers watch out this trap of multiple assignmets !!!</em>
+
+<p>
+LJS allows multiple assignments.
 Therefore, the syntax for assignment
 defines a list of variables on the left side
 and a list of expressions on the right side.
@@ -1440,7 +1445,7 @@ the list of variables.
 If there are more values than needed,
 the excess values are thrown away.
 If there are fewer values than needed,
-the list is extended with as many  <b>nil</b>'s as needed.
+the list is extended with as many  <b>null</b>'s as needed.
 If the list of expressions ends with a function call,
 then all values returned by that call enter the list of values,
 before the adjustment
@@ -1453,8 +1458,8 @@ and only then the assignments are performed.
 Thus the code
 
 <pre>
-     i = 3
-     i, a[i] = i+1, 20
+     i = 3;
+     i, a[i] = i+1, 20;
 </pre><p>
 sets <code>a[3]</code> to 20, without affecting <code>a[4]</code>
 because the <code>i</code> in <code>a[i]</code> is evaluated (to 3)
@@ -1462,13 +1467,13 @@ before it is assigned&nbsp;4.
 Similarly, the line
 
 <pre>
-     x, y = y, x
+     x, y = y, x;
 </pre><p>
 exchanges the values of <code>x</code> and <code>y</code>,
 and
 
 <pre>
-     x, y, z = y, z, x
+     x, y, z = y, z, x;
 </pre><p>
 cyclically permutes the values of <code>x</code>, <code>y</code>, and <code>z</code>.
 
@@ -1490,31 +1495,32 @@ can be changed via metatables (see <a href="#2.4">&sect;2.4</a>).
 
 <h3>3.3.4 &ndash; <a name="3.3.4">Control Structures</a></h3><p>
 The control structures
-<b>if</b>, <b>while</b>, and <b>repeat</b> have the usual meaning and
+<b>if</b>, <b>while</b>, and <b>do while</b> have the usual meaning and
 familiar syntax:
 
 
 
 
 <pre>
-	stat ::= <b>while</b> exp <b>do</b> block <b>end</b>
-	stat ::= <b>repeat</b> block <b>until</b> exp
-	stat ::= <b>if</b> exp <b>then</b> block {<b>elseif</b> exp <b>then</b> block} [<b>else</b> block] <b>end</b>
+	stat ::= <b>while</b> exp <b>{</b> block <b>}</b>
+	stat ::= <b>do</b> block <b>while</b> (exp)
+	stat ::= <b>if(</b> exp <b>) {</b> block <b>}</b>
+	stat ::= <b>if(</b> exp <b>) {</b> block <b>} else {</b> block <b>}</b>
 </pre><p>
-Lua also has a <b>for</b> statement, in two flavors (see <a href="#3.3.5">&sect;3.3.5</a>).
+LJS also has a <b>for</b> statement, in two flavors (see <a href="#3.3.5">&sect;3.3.5</a>).
 
 
 <p>
 The condition expression of a
 control structure can return any value.
-Both <b>false</b> and <b>nil</b> are considered false.
-All values different from <b>nil</b> and <b>false</b> are considered true
-(in particular, the number 0 and the empty string are also true).
+Both <b>false</b> and <b>null</b> are considered false.
+All values different from <b>null</b> and <b>false</b> are considered true
+<b>(!!! in particular, the number 0 and the empty string are also true !!!)</b>.
 
 
 <p>
-In the <b>repeat</b>&ndash;<b>until</b> loop,
-the inner block does not end at the <b>until</b> keyword,
+In the <b>do</b>&ndash;<b>while</b> loop,
+the inner block does not end at the <b>while</b> keyword,
 but only after the condition.
 So, the condition can refer to local variables
 declared inside the loop block.
@@ -1530,7 +1536,7 @@ labels in Lua are considered statements too:
 <pre>
 	stat ::= <b>goto</b> Name
 	stat ::= label
-	label ::= &lsquo;<b>::</b>&rsquo; Name &lsquo;<b>::</b>&rsquo;
+	label ::= Name &lsquo;<b>:</b>&rsquo;
 </pre>
 
 <p>
@@ -1549,7 +1555,7 @@ as they perform no actions.
 
 <p>
 The <b>break</b> statement terminates the execution of a
-<b>while</b>, <b>repeat</b>, or <b>for</b> loop,
+<b>while</b>, <b>do while</b>, or <b>for</b> loop,
 skipping to the next statement after the loop:
 
 
@@ -1558,6 +1564,17 @@ skipping to the next statement after the loop:
 </pre><p>
 A <b>break</b> ends the innermost enclosing loop.
 
+
+<p>
+The <b>continue</b> statement junps the execution of a
+<b>while</b>, <b>do while</b>, or <b>for</b> loop,
+skipping to the end/begining of the innermost enclosing loop:
+
+
+<pre>
+	stat ::= <b>continue</b>
+</pre><p>
+A <b>continue</b> do <b>not</b> ends the innermost enclosing loop.
 
 <p>
 The <b>return</b> statement is used to return values
@@ -1597,7 +1614,7 @@ control variable runs through an arithmetic progression.
 It has the following syntax:
 
 <pre>
-	stat ::= <b>for</b> Name &lsquo;<b>=</b>&rsquo; exp &lsquo;<b>,</b>&rsquo; exp [&lsquo;<b>,</b>&rsquo; exp] <b>do</b> block <b>end</b>
+	stat ::= <b>for(</b> Name &lsquo;<b>=</b>&rsquo; exp &lsquo;<b>,</b>&rsquo; exp [&lsquo;<b>,</b>&rsquo; exp] <b>) {</b> block <b>}</b>
 </pre><p>
 The <em>block</em> is repeated for <em>name</em> starting at the value of
 the first <em>exp</em>, until it passes the second <em>exp</em> by steps of the
@@ -1605,24 +1622,24 @@ third <em>exp</em>.
 More precisely, a <b>for</b> statement like
 
 <pre>
-     for v = <em>e1</em>, <em>e2</em>, <em>e3</em> do <em>block</em> end
+     for( v = <em>e1</em>, <em>e2</em>, <em>e3</em> ) { <em>block</em> }
 </pre><p>
 is equivalent to the code:
 
 <pre>
-     do
-       local <em>var</em>, <em>limit</em>, <em>step</em> = tonumber(<em>e1</em>), tonumber(<em>e2</em>), tonumber(<em>e3</em>)
-       if not (<em>var</em> and <em>limit</em> and <em>step</em>) then error() end
-       <em>var</em> = <em>var</em> - <em>step</em>
-       while true do
-         <em>var</em> = <em>var</em> + <em>step</em>
-         if (<em>step</em> &gt;= 0 and <em>var</em> &gt; <em>limit</em>) or (<em>step</em> &lt; 0 and <em>var</em> &lt; <em>limit</em>) then
-           break
-         end
-         local v = <em>var</em>
+     {
+       var <em>var_name</em>, <em>limit</em>, <em>step</em> = tonumber(<em>e1</em>), tonumber(<em>e2</em>), tonumber(<em>e3</em>);
+       if( ! (<em>var_name</em> &amp;&amp; <em>limit</em> &amp;&amp; <em>step</em>) ) { error() }
+       <em>var_name</em> -= <em>step</em>;
+       while( true ) {
+         <em>var_name</em> += <em>step</em>;
+         if( (<em>step</em> &gt;= 0 &amp;&amp; <em>var_name</em> &gt; <em>limit</em>) || (<em>step</em> &lt; 0 &amp;&amp; <em>var_name</em> &lt; <em>limit</em>) ) {
+           break;
+         }
+         var v = <em>var_name</em>;
          <em>block</em>
-       end
-     end
+       }
+     }
 </pre>
 
 <p>
@@ -1637,7 +1654,7 @@ They must all result in numbers.
 </li>
 
 <li>
-<code><em>var</em></code>, <code><em>limit</em></code>, and <code><em>step</em></code> are invisible variables.
+<code><em>var_name</em></code>, <code><em>limit</em></code>, and <code><em>step</em></code> are invisible variables.
 The names shown here are for explanatory purposes only.
 </li>
 
@@ -1648,6 +1665,7 @@ then a step of&nbsp;1 is used.
 
 <li>
 You can use <b>break</b> and <b>goto</b> to exit a <b>for</b> loop.
+You can also use <b>continue</b> to jump to the end of the loop.
 </li>
 
 <li>
@@ -1662,30 +1680,30 @@ assign it to another variable before exiting the loop.
 The generic <b>for</b> statement works over functions,
 called <em>iterators</em>.
 On each iteration, the iterator function is called to produce a new value,
-stopping when this new value is <b>nil</b>.
+stopping when this new value is <b>null</b>.
 The generic <b>for</b> loop has the following syntax:
 
 <pre>
-	stat ::= <b>for</b> namelist <b>in</b> explist <b>do</b> block <b>end</b>
+	stat ::= <b>for(</b> namelist <b>in</b> explist <b>) {</b> block <b>}</b>
 	namelist ::= Name {&lsquo;<b>,</b>&rsquo; Name}
 </pre><p>
 A <b>for</b> statement like
 
 <pre>
-     for <em>var_1</em>, &middot;&middot;&middot;, <em>var_n</em> in <em>explist</em> do <em>block</em> end
+     for( <em>var_1</em>, &middot;&middot;&middot;, <em>var_n</em> in <em>explist</em> ) { <em>block</em> }
 </pre><p>
 is equivalent to the code:
 
 <pre>
-     do
-       local <em>f</em>, <em>s</em>, <em>var</em> = <em>explist</em>
-       while true do
+     {
+       var <em>f</em>, <em>s</em>, <em>var</em> = <em>explist</em>;
+       while( true ) {
          local <em>var_1</em>, &middot;&middot;&middot;, <em>var_n</em> = <em>f</em>(<em>s</em>, <em>var</em>)
-         if <em>var_1</em> == nil then break end
-         <em>var</em> = <em>var_1</em>
+         if( <em>var_1</em> == null ) { break }
+         <em>var</em> = <em>var_1</em>;
          <em>block</em>
-       end
-     end
+       }
+     }
 </pre><p>
 Note the following:
 
@@ -1705,6 +1723,7 @@ The names are here for explanatory purposes only.
 
 <li>
 You can use <b>break</b> to exit a <b>for</b> loop.
+You can use <b>continue</b> to jump to the end of the <b>for</b> loop.
 </li>
 
 <li>
@@ -1738,11 +1757,11 @@ Local variables can be declared anywhere inside a block.
 The declaration can include an initial assignment:
 
 <pre>
-	stat ::= <b>local</b> namelist [&lsquo;<b>=</b>&rsquo; explist]
+	stat ::= <b>var</b> namelist [&lsquo;<b>=</b>&rsquo; explist]
 </pre><p>
 If present, an initial assignment has the same semantics
 of a multiple assignment (see <a href="#3.3.3">&sect;3.3.3</a>).
-Otherwise, all variables are initialized with <b>nil</b>.
+Otherwise, all variables are initialized with <b>null</b>.
 
 
 <p>
@@ -1762,15 +1781,16 @@ The visibility rules for local variables are explained in <a href="#3.5">&sect;3
 <h2>3.4 &ndash; <a name="3.4">Expressions</a></h2>
 
 <p>
-The basic expressions in Lua are the following:
+The basic expressions in LJS are the following:
 
 <pre>
 	exp ::= prefixexp
-	exp ::= <b>nil</b> | <b>false</b> | <b>true</b>
+	exp ::= <b>null</b> | <b>false</b> | <b>true</b>
 	exp ::= Numeral
 	exp ::= LiteralString
 	exp ::= functiondef
 	exp ::= tableconstructor
+	exp ::= arrayconstructor
 	exp ::= &lsquo;<b>...</b>&rsquo;
 	exp ::= exp binop exp
 	exp ::= unop exp
@@ -1782,7 +1802,7 @@ Numerals and literal strings are explained in <a href="#3.1">&sect;3.1</a>;
 variables are explained in <a href="#3.2">&sect;3.2</a>;
 function definitions are explained in <a href="#3.4.11">&sect;3.4.11</a>;
 function calls are explained in <a href="#3.4.10">&sect;3.4.10</a>;
-table constructors are explained in <a href="#3.4.9">&sect;3.4.9</a>.
+table/array constructors are explained in <a href="#3.4.9">&sect;3.4.9</a>.
 Vararg expressions,
 denoted by three dots ('<code>...</code>'), can only be used when
 directly inside a vararg function;
@@ -1796,7 +1816,7 @@ relational operators (see <a href="#3.4.4">&sect;3.4.4</a>), logical operators (
 and the concatenation operator (see <a href="#3.4.6">&sect;3.4.6</a>).
 Unary operators comprise the unary minus (see <a href="#3.4.1">&sect;3.4.1</a>),
 the unary bitwise NOT (see <a href="#3.4.2">&sect;3.4.2</a>),
-the unary logical <b>not</b> (see <a href="#3.4.5">&sect;3.4.5</a>),
+the unary logical <b>!</b> (see <a href="#3.4.5">&sect;3.4.5</a>),
 and the unary <em>length operator</em> (see <a href="#3.4.7">&sect;3.4.7</a>).
 
 
@@ -1810,31 +1830,31 @@ of a list of expressions,
 then no adjustment is made
 (unless the expression is enclosed in parentheses).
 In all other contexts,
-Lua adjusts the result list to one element,
+LJS adjusts the result list to one element,
 either discarding all values except the first one
-or adding a single <b>nil</b> if there are no values.
+or adding a single <b>null</b> if there are no values.
 
 
 <p>
 Here are some examples:
 
 <pre>
-     f()                -- adjusted to 0 results
-     g(f(), x)          -- f() is adjusted to 1 result
-     g(x, f())          -- g gets x plus all results from f()
-     a,b,c = f(), x     -- f() is adjusted to 1 result (c gets nil)
-     a,b = ...          -- a gets the first vararg argument, b gets
-                        -- the second (both a and b can get nil if there
-                        -- is no corresponding vararg argument)
+     f()                // adjusted to 0 results
+     g(f(), x)          // f() is adjusted to 1 result
+     g(x, f())          // g gets x plus all results from f()
+     a,b,c = f(), x     // f() is adjusted to 1 result (c gets null)
+     a,b = ...          // a gets the first vararg argument, b gets
+                        // the second (both a and b can get null if there
+                        // is no corresponding vararg argument)
      
-     a,b,c = x, f()     -- f() is adjusted to 2 results
-     a,b,c = f()        -- f() is adjusted to 3 results
-     return f()         -- returns all results from f()
-     return ...         -- returns all received vararg arguments
-     return x,y,f()     -- returns x, y, and all results from f()
-     {f()}              -- creates a list with all results from f()
-     {...}              -- creates a list with all vararg arguments
-     {f(), nil}         -- f() is adjusted to 1 result
+     a,b,c = x, f()     // f() is adjusted to 2 results
+     a,b,c = f()        // f() is adjusted to 3 results
+     return f()         // returns all results from f()
+     return ...         // returns all received vararg arguments
+     return x,y,f()     // returns x, y, and all results from f()
+     {f()}              // creates a list with all results from f()
+     {...}              // creates a list with all vararg arguments
+     {f(), null}         // f() is adjusted to 1 result
 </pre>
 
 <p>
@@ -1843,22 +1863,34 @@ Thus,
 <code>(f(x,y,z))</code> is always a single value,
 even if <code>f</code> returns several values.
 (The value of <code>(f(x,y,z))</code> is the first value returned by <code>f</code>
-or <b>nil</b> if <code>f</code> does not return any values.)
+or <b>null</b> if <code>f</code> does not return any values.)
 
 
 
 <h3>3.4.1 &ndash; <a name="3.4.1">Arithmetic Operators</a></h3><p>
-Lua supports the following arithmetic operators:
+LJS supports the following arithmetic operators:
 
 <ul>
 <li><b><code>+</code>: </b>addition</li>
 <li><b><code>-</code>: </b>subtraction</li>
 <li><b><code>*</code>: </b>multiplication</li>
 <li><b><code>/</code>: </b>float division</li>
-<li><b><code>//</code>: </b>floor division</li>
+<li><b><code>idiv?</code>: </b>floor division</li>
 <li><b><code>%</code>: </b>modulo</li>
-<li><b><code>^</code>: </b>exponentiation</li>
+<li><b><code>**</code>: </b>exponentiation</li>
 <li><b><code>-</code>: </b>unary minus</li>
+</ul>
+
+<p>
+LJS also supports the following compound arithmetic operators:
+
+<ul>
+<li><b><code>+=</code>: </b>addition</li>
+<li><b><code>-=</code>: </b>subtraction</li>
+<li><b><code>*=</code>: </b>multiplication</li>
+<li><b><code>/=</code>: </b>float division</li>
+<li><b><code>?idiv?=</code>: </b>floor division</li>
+<li><b><code>%=</code>: </b>modulo</li>
 </ul>
 
 <p>
@@ -1885,7 +1917,7 @@ so that it works for non-integer exponents too.
 
 
 <p>
-Floor division (<code>//</code>) is a division
+Floor division (<code>?idiv?</code>) is a division
 that rounds the quotient towards minus infinity,
 that is, the floor of the division of its operands.
 
@@ -1911,7 +1943,7 @@ Lua supports the following bitwise operators:
 <ul>
 <li><b><code>&amp;</code>: </b>bitwise AND</li>
 <li><b><code>&#124;</code>: </b>bitwise OR</li>
-<li><b><code>~</code>: </b>bitwise exclusive OR</li>
+<li><b><code>^</code>: </b>bitwise exclusive OR</li>
 <li><b><code>&gt;&gt;</code>: </b>right shift</li>
 <li><b><code>&lt;&lt;</code>: </b>left shift</li>
 <li><b><code>~</code>: </b>unary bitwise NOT</li>
@@ -1936,7 +1968,7 @@ result in zero (as all bits are shifted out).
 
 
 <h3>3.4.3 &ndash; <a name="3.4.3">Coercions and Conversions</a></h3><p>
-Lua provides some automatic conversions between some
+LJS provides some automatic conversions between some
 types and representations at run time.
 Bitwise operators always convert float operands to integers.
 Exponentiation and float division
@@ -1951,8 +1983,8 @@ besides strings.
 
 
 <p>
-Lua also converts strings to numbers,
-whenever a number is expected.
+!!! LJS also converts strings to numbers,
+whenever a number is expected. !!!
 
 
 <p>
@@ -1977,7 +2009,7 @@ Otherwise, the conversion fails.
 <p>
 The conversion from strings to numbers goes as follows:
 First, the string is converted to an integer or a float,
-following its syntax and the rules of the Lua lexer.
+following its syntax and the rules of the LJS lexer.
 (The string may have also leading and trailing spaces and a sign.)
 Then, the resulting number (float or integer)
 is converted to the type (float or integer) required by the context
@@ -1988,7 +2020,7 @@ is converted to the type (float or integer) required by the context
 All conversions from strings to numbers
 accept both a dot and the current locale mark
 as the radix character.
-(The Lua lexer, however, accepts only a dot.)
+(The LJS lexer, however, accepts only a dot.)
 
 
 <p>
@@ -2003,11 +2035,11 @@ use the <code>format</code> function from the string library
 
 
 <h3>3.4.4 &ndash; <a name="3.4.4">Relational Operators</a></h3><p>
-Lua supports the following relational operators:
+LJS supports the following relational operators:
 
 <ul>
 <li><b><code>==</code>: </b>equality</li>
-<li><b><code>~=</code>: </b>inequality</li>
+<li><b><code>!=</code>: </b>inequality</li>
 <li><b><code>&lt;</code>: </b>less than</li>
 <li><b><code>&gt;</code>: </b>greater than</li>
 <li><b><code>&lt;=</code>: </b>less or equal</li>
@@ -2040,7 +2072,7 @@ may be classified as equal or not
 
 
 <p>
-You can change the way that Lua compares tables and userdata
+You can change the way that LJS compares tables and userdata
 by using the "eq" metamethod (see <a href="#2.4">&sect;2.4</a>).
 
 
@@ -2063,7 +2095,7 @@ then they are compared according to their mathematical values
 (regardless of their subtypes).
 Otherwise, if both arguments are strings,
 then their values are compared according to the current locale.
-Otherwise, Lua tries to call the "lt" or the "le"
+Otherwise, LJS tries to call the "lt" or the "le"
 metamethod (see <a href="#2.4">&sect;2.4</a>).
 A comparison <code>a &gt; b</code> is translated to <code>b &lt; a</code>
 and <code>a &gt;= b</code> is translated to <code>b &lt;= a</code>.
@@ -2079,45 +2111,45 @@ nor equal to, nor greater than any value (including itself).
 
 
 <h3>3.4.5 &ndash; <a name="3.4.5">Logical Operators</a></h3><p>
-The logical operators in Lua are
-<b>and</b>, <b>or</b>, and <b>not</b>.
+The logical operators in LJS are
+<b>&amp;&amp;</b>, <b>||</b>, and <b>!</b>.
 Like the control structures (see <a href="#3.3.4">&sect;3.3.4</a>),
-all logical operators consider both <b>false</b> and <b>nil</b> as false
+all logical operators consider both <b>false</b> and <b>null</b> as false
 and anything else as true.
 
 
 <p>
-The negation operator <b>not</b> always returns <b>false</b> or <b>true</b>.
-The conjunction operator <b>and</b> returns its first argument
-if this value is <b>false</b> or <b>nil</b>;
-otherwise, <b>and</b> returns its second argument.
-The disjunction operator <b>or</b> returns its first argument
-if this value is different from <b>nil</b> and <b>false</b>;
-otherwise, <b>or</b> returns its second argument.
-Both <b>and</b> and <b>or</b> use short-circuit evaluation;
+The negation operator <b>!</b> always returns <b>false</b> or <b>true</b>.
+The conjunction operator <b>&amp;&amp;</b> returns its first argument
+if this value is <b>false</b> or <b>null</b>;
+otherwise, <b>&amp;&amp;</b> returns its second argument.
+The disjunction operator <b>||</b> returns its first argument
+if this value is different from <b>null</b> and <b>false</b>;
+otherwise, <b>||</b> returns its second argument.
+Both <b>&amp;&amp;</b> and <b>||</b> use short-circuit evaluation;
 that is,
 the second operand is evaluated only if necessary.
 Here are some examples:
 
 <pre>
-     10 or 20            --&gt; 10
-     10 or error()       --&gt; 10
-     nil or "a"          --&gt; "a"
-     nil and 10          --&gt; nil
-     false and error()   --&gt; false
-     false and nil       --&gt; false
-     false or nil        --&gt; nil
-     10 and 20           --&gt; 20
+     10 || 20            //&gt; 10
+     10 || error()       //&gt; 10
+     null || "a"          //&gt; "a"
+     null &amp;&amp; 10          //&gt; null
+     false &amp;&amp; error()   //&gt; false
+     false &amp;&amp; null       //&gt; false
+     false || null        //&gt; null
+     10 &amp;&amp; 20           //&gt; 20
 </pre><p>
 (In this manual,
-<code>--&gt;</code> indicates the result of the preceding expression.)
+<code>//&gt;</code> indicates the result of the preceding expression.)
 
 
 
 
 
 <h3>3.4.6 &ndash; <a name="3.4.6">Concatenation</a></h3><p>
-The string concatenation operator in Lua is
+The string concatenation operator in LJS is
 denoted by two dots ('<code>..</code>').
 If both operands are strings or numbers, then they are converted to
 strings according to the rules described in <a href="#3.4.3">&sect;3.4.3</a>.
@@ -2146,21 +2178,21 @@ A <em>border</em> in a table <code>t</code> is any natural number
 that satisfies the following condition:
 
 <pre>
-     (border == 0 or t[border] ~= nil) and t[border + 1] == nil
+     (border == 0 || t[border] != null) &amp;&amp; t[border + 1] == null
 </pre><p>
 In words,
 a border is any (natural) index in a table
-where a non-nil value is followed by a nil value
-(or zero, when index 1 is nil).
+where a non-null value is followed by a null value
+(or zero, when index 1 is null).
 
 
 <p>
 A table with exactly one border is called a <em>sequence</em>.
 For instance, the table <code>{10, 20, 30, 40, 50}</code> is a sequence,
 as it has only one border (5).
-The table <code>{10, 20, 30, nil, 50}</code> has two borders (3 and 5),
+The table <code>{10, 20, 30, null, 50}</code> has two borders (3 and 5),
 and therefore it is not a sequence.
-The table <code>{nil, 20, 30, nil, nil, 60, nil}</code>
+The table <code>{null, 20, 30, null, null, 60, null}</code>
 has three borders (0, 3, and 6),
 so it is not a sequence, too.
 The table <code>{}</code> is a sequence with border 0.
@@ -2195,26 +2227,26 @@ any value but strings through the <code>__len</code> metamethod (see <a href="#2
 
 
 <h3>3.4.8 &ndash; <a name="3.4.8">Precedence</a></h3><p>
-Operator precedence in Lua follows the table below,
+Operator precedence in LJS follows the table below,
 from lower to higher priority:
 
 <pre>
-     or
-     and
-     &lt;     &gt;     &lt;=    &gt;=    ~=    ==
+     ||
+     &amp;&amp;
+     &lt;     &gt;     &lt;=    &gt;=    !=    ==
      |
-     ~
+     ^
      &amp;
      &lt;&lt;    &gt;&gt;
      ..
      +     -
-     *     /     //    %
-     unary operators (not   #     -     ~)
-     ^
+     *     /     idiv?    %
+     unary operators (!   #     -     ~)
+     **
 </pre><p>
 As usual,
 you can use parentheses to change the precedences of an expression.
-The concatenation ('<code>..</code>') and exponentiation ('<code>^</code>')
+The concatenation ('<code>..</code>') and exponentiation ('<code>**</code>')
 operators are right associative.
 All other binary operators are left associative.
 
@@ -2222,17 +2254,26 @@ All other binary operators are left associative.
 
 
 
-<h3>3.4.9 &ndash; <a name="3.4.9">Table Constructors</a></h3><p>
-Table constructors are expressions that create tables.
+<h3>3.4.9 &ndash; <a name="3.4.9">Table/Array Constructors</a></h3><p>
+Table/Array constructors are expressions that create tables.
 Every time a constructor is evaluated, a new table is created.
 A constructor can be used to create an empty table
 or to create a table and initialize some of its fields.
+(Array constructors are syntatic sugar for tables with exp fields.)
 The general syntax for constructors is
 
 <pre>
 	tableconstructor ::= &lsquo;<b>{</b>&rsquo; [fieldlist] &lsquo;<b>}</b>&rsquo;
 	fieldlist ::= field {fieldsep field} [fieldsep]
-	field ::= &lsquo;<b>[</b>&rsquo; exp &lsquo;<b>]</b>&rsquo; &lsquo;<b>=</b>&rsquo; exp | Name &lsquo;<b>=</b>&rsquo; exp | exp
+	field ::= &lsquo;<b>[</b>&rsquo; exp &lsquo;<b>]</b>&rsquo; &lsquo;<b>fieldkvsep</b>&rsquo; exp | Name &lsquo;<b>fieldkvsep</b>&rsquo; exp | exp
+	fieldkvsep ::= &lsquo;<b>=</b>&rsquo; | &lsquo;<b>:</b>&rsquo;
+	fieldsep ::= &lsquo;<b>,</b>&rsquo; | &lsquo;<b>;</b>&rsquo;
+</pre>
+
+<pre>
+	arrayconstructor ::= &lsquo;<b>[</b>&rsquo; [fieldlist] &lsquo;<b>]</b>&rsquo;
+	fieldlist ::= field {fieldsep field} [fieldsep]
+	field ::= exp
 	fieldsep ::= &lsquo;<b>,</b>&rsquo; | &lsquo;<b>;</b>&rsquo;
 </pre>
 
@@ -2248,27 +2289,44 @@ Fields in the other formats do not affect this counting.
 For example,
 
 <pre>
-     a = { [f(1)] = g; "x", "y"; x = 1, f(x), [30] = 23; 45 }
+     a = { [f(1)] = g; "x", "y"; x : 1, f(x), [30] : 23; 45 };
 </pre><p>
 is equivalent to
 
 <pre>
-     do
-       local t = {}
+     {
+       var t = {}
        t[f(1)] = g
-       t[1] = "x"         -- 1st exp
-       t[2] = "y"         -- 2nd exp
-       t.x = 1            -- t["x"] = 1
-       t[3] = f(x)        -- 3rd exp
+       t[1] = "x"         // 1st exp
+       t[2] = "y"         // 2nd exp
+       t.x = 1            // t["x"] = 1
+       t[3] = f(x)        // 3rd exp
        t[30] = 23
-       t[4] = 45          -- 4th exp
+       t[4] = 45          // 4th exp
        a = t
-     end
+     }
+</pre>
+
+<pre>
+     a = [ 4, 3, 2, 1 , "num" ];
+</pre><p>
+is equivalent to
+
+<pre>
+     {
+       var t = []
+       t[1] = 4        // 1st exp
+       t[2] = 3         // 2nd exp
+       t[3] = 2         // 3nd exp
+       t[4] = 1         // ...
+       t[5] = "num" 
+     }
 </pre>
 
 <p>
 The order of the assignments in a constructor is undefined.
 (This order would be relevant only when there are repeated keys.)
+(Except for Arrays that do maintain the order of insertion.)
 
 
 <p>
@@ -2287,7 +2345,7 @@ as a convenience for machine-generated code.
 
 
 <h3>3.4.10 &ndash; <a name="3.4.10">Function Calls</a></h3><p>
-A function call in Lua has the following syntax:
+A function call in LJS has the following syntax:
 
 <pre>
 	functioncall ::= prefixexp args
@@ -2310,7 +2368,7 @@ The form
 	functioncall ::= prefixexp &lsquo;<b>:</b>&rsquo; Name args
 </pre><p>
 can be used to call "methods".
-A call <code>v:name(<em>args</em>)</code>
+A call <code>v->name(<em>args</em>)</code>
 is syntactic sugar for <code>v.name(v,<em>args</em>)</code>,
 except that <code>v</code> is evaluated only once.
 
@@ -2320,23 +2378,13 @@ Arguments have the following syntax:
 
 <pre>
 	args ::= &lsquo;<b>(</b>&rsquo; [explist] &lsquo;<b>)</b>&rsquo;
-	args ::= tableconstructor
-	args ::= LiteralString
 </pre><p>
 All argument expressions are evaluated before the call.
-A call of the form <code>f{<em>fields</em>}</code> is
-syntactic sugar for <code>f({<em>fields</em>})</code>;
-that is, the argument list is a single new table.
-A call of the form <code>f'<em>string</em>'</code>
-(or <code>f"<em>string</em>"</code> or <code>f[[<em>string</em>]]</code>)
-is syntactic sugar for <code>f('<em>string</em>')</code>;
-that is, the argument list is a single literal string.
-
 
 <p>
 A call of the form <code>return <em>functioncall</em></code> is called
 a <em>tail call</em>.
-Lua implements <em>proper tail calls</em>
+LJS implements <em>proper tail calls</em>
 (or <em>proper tail recursion</em>):
 in a tail call,
 the called function reuses the stack entry of the calling function.
@@ -2351,11 +2399,11 @@ the returns of the called function.
 So, none of the following examples are tail calls:
 
 <pre>
-     return (f(x))        -- results adjusted to 1
+     return (f(x))        // results adjusted to 1
      return 2 * f(x)
-     return x, f(x)       -- additional results
-     f(x); return         -- results discarded
-     return x or f(x)     -- results adjusted to 1
+     return x, f(x)       // additional results
+     f(x); return         // results discarded
+     return x || f(x)     // results adjusted to 1
 </pre>
 
 
@@ -2368,7 +2416,7 @@ The syntax for function definition is
 
 <pre>
 	functiondef ::= <b>function</b> funcbody
-	funcbody ::= &lsquo;<b>(</b>&rsquo; [parlist] &lsquo;<b>)</b>&rsquo; block <b>end</b>
+	funcbody ::= &lsquo;<b>(</b>&rsquo; [parlist] &lsquo;<b>) {</b>&rsquo; block <b>}</b>
 </pre>
 
 <p>
@@ -2376,43 +2424,43 @@ The following syntactic sugar simplifies function definitions:
 
 <pre>
 	stat ::= <b>function</b> funcname funcbody
-	stat ::= <b>local</b> <b>function</b> Name funcbody
+	stat ::= <b>var</b> <b>function</b> Name funcbody
 	funcname ::= Name {&lsquo;<b>.</b>&rsquo; Name} [&lsquo;<b>:</b>&rsquo; Name]
 </pre><p>
 The statement
 
 <pre>
-     function f () <em>body</em> end
+     function f () { <em>body</em> }
 </pre><p>
 translates to
 
 <pre>
-     f = function () <em>body</em> end
+     f = function () { <em>body</em> }
 </pre><p>
 The statement
 
 <pre>
-     function t.a.b.c.f () <em>body</em> end
+     function t.a.b.c.f () { <em>body</em> }
 </pre><p>
 translates to
 
 <pre>
-     t.a.b.c.f = function () <em>body</em> end
+     t.a.b.c.f = function () { <em>body</em> }
 </pre><p>
 The statement
 
 <pre>
-     local function f () <em>body</em> end
+     var function f () { <em>body</em> }
 </pre><p>
 translates to
 
 <pre>
-     local f; f = function () <em>body</em> end
+     var f; f = function () { <em>body</em> }
 </pre><p>
 not to
 
 <pre>
-     local f = function () <em>body</em> end
+     var f = function () { <em>body</em> }
 </pre><p>
 (This only makes a difference when the body of the function
 contains references to <code>f</code>.)
@@ -2421,9 +2469,9 @@ contains references to <code>f</code>.)
 <p>
 A function definition is an executable expression,
 whose value has type <em>function</em>.
-When Lua precompiles a chunk,
+When LJS precompiles a chunk,
 all its function bodies are precompiled too.
-Then, whenever Lua executes the function definition,
+Then, whenever LJS executes the function definition,
 the function is <em>instantiated</em> (or <em>closed</em>).
 This function instance (or <em>closure</em>)
 is the final value of the expression.
@@ -2460,9 +2508,9 @@ then no adjustment is made
 As an example, consider the following definitions:
 
 <pre>
-     function f(a, b) end
-     function g(a, b, ...) end
-     function r() return 1,2,3 end
+     function f(a, b) {}
+     function g(a, b, ...) {}
+     function r() { return 1,2,3; }
 </pre><p>
 Then, we have the following mapping from arguments to parameters and
 to the vararg expression:
@@ -2470,16 +2518,16 @@ to the vararg expression:
 <pre>
      CALL            PARAMETERS
      
-     f(3)             a=3, b=nil
+     f(3)             a=3, b=null
      f(3, 4)          a=3, b=4
      f(3, 4, 5)       a=3, b=4
      f(r(), 10)       a=1, b=10
      f(r())           a=1, b=2
      
-     g(3)             a=3, b=nil, ... --&gt;  (nothing)
-     g(3, 4)          a=3, b=4,   ... --&gt;  (nothing)
-     g(3, 4, 5, 8)    a=3, b=4,   ... --&gt;  5  8
-     g(5, r())        a=5, b=1,   ... --&gt;  2  3
+     g(3)             a=3, b=null, ... //&gt;  (nothing)
+     g(3, 4)          a=3, b=4,   ... //&gt;  (nothing)
+     g(3, 4, 5, 8)    a=3, b=4,   ... //&gt;  5  8
+     g(5, r())        a=5, b=1,   ... //&gt;  2  3
 </pre>
 
 <p>
@@ -2497,18 +2545,18 @@ This limit is guaranteed to be larger than 1000.
 
 
 <p>
-The <em>colon</em> syntax
+The <em>arrow</em> syntax
 is used for defining <em>methods</em>,
-that is, functions that have an implicit extra parameter <code>self</code>.
+that is, functions that have an implicit extra parameter <code>this</code>.
 Thus, the statement
 
 <pre>
-     function t.a.b.c:f (<em>params</em>) <em>body</em> end
+     function t.a.b.c:f (<em>params</em>) { <em>body</em> }
 </pre><p>
 is syntactic sugar for
 
 <pre>
-     t.a.b.c.f = function (self, <em>params</em>) <em>body</em> end
+     t.a.b.c.f = function (this, <em>params</em>) { <em>body</em> }
 </pre>
 
 
@@ -2520,29 +2568,29 @@ is syntactic sugar for
 
 <p>
 
-Lua is a lexically scoped language.
+LJS is a lexically scoped language.
 The scope of a local variable begins at the first statement after
 its declaration and lasts until the last non-void statement
 of the innermost block that includes the declaration.
 Consider the following example:
 
 <pre>
-     x = 10                -- global variable
-     do                    -- new block
-       local x = x         -- new 'x', with value 10
-       print(x)            --&gt; 10
-       x = x+1
-       do                  -- another block
-         local x = x+1     -- another 'x'
-         print(x)          --&gt; 12
-       end
-       print(x)            --&gt; 11
-     end
-     print(x)              --&gt; 10  (the global one)
+     x = 10                // global variable
+     {                    // new block
+       var x = x         // new 'x', with value 10
+       print(x)            //&gt; 10
+       x += 1
+       {                  // another block
+         var x = x+1     // another 'x'
+         print(x)          //&gt; 12
+       }
+       print(x)            //&gt; 11
+     }
+     print(x)              //&gt; 10  (the global one)
 </pre>
 
 <p>
-Notice that, in a declaration like <code>local x = x</code>,
+Notice that, in a declaration like <code>var x = x</code>,
 the new <code>x</code> being declared is not in scope yet,
 and so the second <code>x</code> refers to the outside variable.
 
@@ -2557,17 +2605,17 @@ inside the inner function.
 
 
 <p>
-Notice that each execution of a <b>local</b> statement
+Notice that each execution of a <b>var</b> statement
 defines new local variables.
 Consider the following example:
 
 <pre>
-     a = {}
-     local x = 20
-     for i=1,10 do
-       local y = 0
-       a[i] = function () y=y+1; return x+y end
-     end
+     a = {};
+     var x = 20;
+     for( i=1,10 ) {
+       var y = 0;
+       a[i] = function () { y=y+1; return x+y; };
+     }
 </pre><p>
 The loop creates ten closures
 (that is, ten instances of the anonymous function).
@@ -2579,6 +2627,9 @@ while all of them share the same <code>x</code>.
 
 
 <h1>4 &ndash; <a name="4">The Application Program Interface</a></h1>
+
+<p>
+<em>LJS is only a new syntax on top of Lua VM/library so no changes to the C API and all works as in Lua</em>.
 
 <p>
 
@@ -2633,7 +2684,7 @@ to the <em>main thread</em> in the new state.
 <p>
 Lua uses a <em>virtual stack</em> to pass values to and from C.
 Each element in this stack represents a Lua value
-(<b>nil</b>, number, string, etc.).
+(<b>null</b>, number, string, etc.).
 Functions in the API can access this stack through the
 Lua state parameter that they receive.
 
@@ -2746,7 +2797,7 @@ that is, without the need to check whether 3 is a valid index.
 For functions that can be called with acceptable indices,
 any non-valid index is treated as if it
 contains a value of a virtual type <a name="pdf-LUA_TNONE"><code>LUA_TNONE</code></a>,
-which behaves like a nil value.
+which behaves like a null value.
 
 
 
@@ -3826,12 +3877,12 @@ and 0&nbsp;otherwise.
 
 
 
-<hr><h3><a name="lua_isnil"><code>lua_isnil</code></a></h3><p>
+<hr><h3><a name="lua_isnull"><code>lua_isnull</code></a></h3><p>
 <span class="apii">[-0, +0, &ndash;]</span>
-<pre>int lua_isnil (lua_State *L, int index);</pre>
+<pre>int lua_isnull (lua_State *L, int index);</pre>
 
 <p>
-Returns 1 if the value at the given index is <b>nil</b>,
+Returns 1 if the value at the given index is <b>null</b>,
 and 0&nbsp;otherwise.
 
 
@@ -3850,13 +3901,13 @@ and 0&nbsp;otherwise.
 
 
 
-<hr><h3><a name="lua_isnoneornil"><code>lua_isnoneornil</code></a></h3><p>
+<hr><h3><a name="lua_isnoneornull"><code>lua_isnoneornull</code></a></h3><p>
 <span class="apii">[-0, +0, &ndash;]</span>
-<pre>int lua_isnoneornil (lua_State *L, int index);</pre>
+<pre>int lua_isnoneornull (lua_State *L, int index);</pre>
 
 <p>
 Returns 1 if the given index is not valid
-or if the value at this index is <b>nil</b>,
+or if the value at this index is <b>null</b>,
 and 0&nbsp;otherwise.
 
 
@@ -4044,7 +4095,7 @@ its first upvalue is set to the value of the global environment
 stored at index <code>LUA_RIDX_GLOBALS</code> in the registry (see <a href="#4.5">&sect;4.5</a>).
 When loading main chunks,
 this upvalue will be the <code>_ENV</code> variable (see <a href="#2.2">&sect;2.2</a>).
-Other upvalues are initialized with <b>nil</b>.
+Other upvalues are initialized with <b>null</b>.
 
 
 
@@ -4494,7 +4545,7 @@ Returns a pointer to the internal copy of the string.
 <pre>void lua_pushnil (lua_State *L);</pre>
 
 <p>
-Pushes a nil value onto the stack.
+Pushes a null value onto the stack.
 
 
 
@@ -4528,7 +4579,7 @@ Returns a pointer to the internal copy of the string.
 
 
 <p>
-If <code>s</code> is <code>NULL</code>, pushes <b>nil</b> and returns <code>NULL</code>.
+If <code>s</code> is <code>NULL</code>, pushes <b>null</b> and returns <code>NULL</code>.
 
 
 
@@ -4939,7 +4990,7 @@ for the "newindex" event (see <a href="#2.4">&sect;2.4</a>).
 Accepts any index, or&nbsp;0,
 and sets the stack top to this index.
 If the new top is larger than the old one,
-then the new elements are filled with <b>nil</b>.
+then the new elements are filled with <b>null</b>.
 If <code>index</code> is&nbsp;0, then all stack elements are removed.
 
 
@@ -5033,7 +5084,7 @@ Converts the Lua value at the given index to a C&nbsp;boolean
 value (0&nbsp;or&nbsp;1).
 Like all tests in Lua,
 <a href="#lua_toboolean"><code>lua_toboolean</code></a> returns true for any Lua value
-different from <b>false</b> and <b>nil</b>;
+different from <b>false</b> and <b>null</b>;
 otherwise it returns false.
 (If you want to accept only actual boolean values,
 use <a href="#lua_isboolean"><code>lua_isboolean</code></a> to test the value's type.)
@@ -5222,7 +5273,7 @@ Returns the type of the value in the given valid index,
 or <code>LUA_TNONE</code> for a non-valid (but acceptable) index.
 The types returned by <a href="#lua_type"><code>lua_type</code></a> are coded by the following constants
 defined in <code>lua.h</code>:
-<a name="pdf-LUA_TNIL"><code>LUA_TNIL</code></a> (0),
+<a name="pdf-LUA_Tnull"><code>LUA_Tnull</code></a> (0),
 <a name="pdf-LUA_TNUMBER"><code>LUA_TNUMBER</code></a>,
 <a name="pdf-LUA_TBOOLEAN"><code>LUA_TBOOLEAN</code></a>,
 <a name="pdf-LUA_TSTRING"><code>LUA_TSTRING</code></a>,
@@ -6213,7 +6264,7 @@ this function returns false (without pushing any value on the stack).
 
 <p>
 Checks whether the function has an argument
-of any type (including <b>nil</b>) at position <code>arg</code>.
+of any type (including <b>null</b>) at position <code>arg</code>.
 
 
 
@@ -6282,7 +6333,7 @@ if the string cannot be found.
 <p>
 If <code>def</code> is not <code>NULL</code>,
 the function uses <code>def</code> as a default value when
-there is no argument <code>arg</code> or when this argument is <b>nil</b>.
+there is no argument <code>arg</code> or when this argument is <b>null</b>.
 
 
 <p>
@@ -6460,7 +6511,7 @@ Pushes onto the stack the field <code>e</code> from the metatable
 of the object at index <code>obj</code> and returns the type of the pushed value.
 If the object does not have a metatable,
 or if the metatable does not have this field,
-pushes nothing and returns <code>LUA_TNIL</code>.
+pushes nothing and returns <code>LUA_Tnull</code>.
 
 
 
@@ -6473,7 +6524,7 @@ pushes nothing and returns <code>LUA_TNIL</code>.
 <p>
 Pushes onto the stack the metatable associated with name <code>tname</code>
 in the registry (see <a href="#luaL_newmetatable"><code>luaL_newmetatable</code></a>)
-(<b>nil</b> if there is no metatable associated with that name).
+(<b>null</b> if there is no metatable associated with that name).
 Returns the type of the pushed value.
 
 
@@ -6738,9 +6789,9 @@ Opens all standard Lua libraries into the given state.
 This macro is defined as follows:
 
 <pre>
-     (lua_isnoneornil(L,(arg)) ? (dflt) : func(L,(arg)))
+     (lua_isnoneornull(L,(arg)) ? (dflt) : func(L,(arg)))
 </pre><p>
-In words, if the argument <code>arg</code> is nil or absent,
+In words, if the argument <code>arg</code> is null or absent,
 the macro results in the default <code>dflt</code>.
 Otherwise, it results in the result of calling <code>func</code>
 with the state <code>L</code> and the argument index <code>arg</code> as
@@ -6761,7 +6812,7 @@ Note that it evaluates the expression <code>dflt</code> only if needed.
 If the function argument <code>arg</code> is an integer
 (or convertible to an integer),
 returns this integer.
-If this argument is absent or is <b>nil</b>,
+If this argument is absent or is <b>null</b>,
 returns <code>d</code>.
 Otherwise, raises an error.
 
@@ -6779,7 +6830,7 @@ Otherwise, raises an error.
 <p>
 If the function argument <code>arg</code> is a string,
 returns this string.
-If this argument is absent or is <b>nil</b>,
+If this argument is absent or is <b>null</b>,
 returns <code>d</code>.
 Otherwise, raises an error.
 
@@ -6807,7 +6858,7 @@ so all conversions and caveats of that function apply here.
 <p>
 If the function argument <code>arg</code> is a number,
 returns this number.
-If this argument is absent or is <b>nil</b>,
+If this argument is absent or is <b>null</b>,
 returns <code>d</code>.
 Otherwise, raises an error.
 
@@ -6824,7 +6875,7 @@ Otherwise, raises an error.
 <p>
 If the function argument <code>arg</code> is a string,
 returns this string.
-If this argument is absent or is <b>nil</b>,
+If this argument is absent or is <b>null</b>,
 returns <code>d</code>.
 Otherwise, raises an error.
 
@@ -6903,8 +6954,8 @@ Function <a href="#luaL_unref"><code>luaL_unref</code></a> frees a reference and
 
 
 <p>
-If the object at the top of the stack is <b>nil</b>,
-<a href="#luaL_ref"><code>luaL_ref</code></a> returns the constant <a name="pdf-LUA_REFNIL"><code>LUA_REFNIL</code></a>.
+If the object at the top of the stack is <b>null</b>,
+<a href="#luaL_ref"><code>luaL_ref</code></a> returns the constant <a name="pdf-LUA_REFnull"><code>LUA_REFnull</code></a>.
 The constant <a name="pdf-LUA_NOREF"><code>LUA_NOREF</code></a> is guaranteed to be different
 from any reference returned by <a href="#luaL_ref"><code>luaL_ref</code></a>.
 
@@ -7017,7 +7068,7 @@ that will be called to close the stream
 when the handle is closed or collected;
 this function receives the file handle as its sole argument and
 must return either <b>true</b> (in case of success)
-or <b>nil</b> plus an error message (in case of error).
+or <b>null</b> plus an error message (in case of error).
 Once Lua calls this field,
 it changes the field value to <code>NULL</code>
 to signal that the handle is closed.
@@ -7102,7 +7153,7 @@ The reference <code>ref</code> is also freed to be used again.
 
 
 <p>
-If <code>ref</code> is <a href="#pdf-LUA_NOREF"><code>LUA_NOREF</code></a> or <a href="#pdf-LUA_REFNIL"><code>LUA_REFNIL</code></a>,
+If <code>ref</code> is <a href="#pdf-LUA_NOREF"><code>LUA_NOREF</code></a> or <a href="#pdf-LUA_REFnull"><code>LUA_REFnull</code></a>,
 <a href="#luaL_unref"><code>luaL_unref</code></a> does nothing.
 
 
@@ -7205,7 +7256,7 @@ These functions are declared in <a name="pdf-lualib.h"><code>lualib.h</code></a>
 <h2>6.1 &ndash; <a name="6.1">Basic Functions</a></h2>
 
 <p>
-The basic library provides core functions to Lua.
+The basic library provides core functions to LJS.
 If you do not include this library in your application,
 you should check carefully whether you need to provide
 implementations for some of its facilities.
@@ -7217,7 +7268,7 @@ implementations for some of its facilities.
 
 <p>
 Calls <a href="#pdf-error"><code>error</code></a> if
-the value of its argument <code>v</code> is false (i.e., <b>nil</b> or <b>false</b>);
+the value of its argument <code>v</code> is false (i.e., <b>null</b> or <b>false</b>);
 otherwise, returns all its arguments.
 In case of error,
 <code>message</code> is the error object;
@@ -7340,7 +7391,7 @@ nor vice versa.
 
 
 <p>
-If <code>object</code> does not have a metatable, returns <b>nil</b>.
+If <code>object</code> does not have a metatable, returns <b>null</b>.
 Otherwise,
 if the object's metatable has a <code>__metatable</code> field,
 returns the associated value.
@@ -7362,7 +7413,7 @@ so that the construction
 </pre><p>
 will iterate over the key&ndash;value pairs
 (<code>1,t[1]</code>), (<code>2,t[2]</code>), ...,
-up to the first nil value.
+up to the first null value.
 
 
 
@@ -7381,13 +7432,13 @@ If <code>chunk</code> is a function,
 <code>load</code> calls it repeatedly to get the chunk pieces.
 Each call to <code>chunk</code> must return a string that concatenates
 with previous results.
-A return of an empty string, <b>nil</b>, or no value signals the end of the chunk.
+A return of an empty string, <b>null</b>, or no value signals the end of the chunk.
 
 
 <p>
 If there are no syntactic errors,
 returns the compiled chunk as a function;
-otherwise, returns <b>nil</b> plus the error message.
+otherwise, returns <b>null</b> plus the error message.
 
 
 <p>
@@ -7395,7 +7446,7 @@ If the resulting function has upvalues,
 the first upvalue is set to the value of <code>env</code>,
 if that parameter is given,
 or to the value of the global environment.
-Other upvalues are initialized with <b>nil</b>.
+Other upvalues are initialized with <b>null</b>.
 (When you load a main chunk,
 the resulting function will always have exactly one upvalue,
 the <code>_ENV</code> variable (see <a href="#2.2">&sect;2.2</a>).
@@ -7454,13 +7505,13 @@ Its first argument is a table and its second argument
 is an index in this table.
 <code>next</code> returns the next index of the table
 and its associated value.
-When called with <b>nil</b> as its second argument,
+When called with <b>null</b> as its second argument,
 <code>next</code> returns an initial index
 and its associated value.
 When called with the last index,
-or with <b>nil</b> in an empty table,
-<code>next</code> returns <b>nil</b>.
-If the second argument is absent, then it is interpreted as <b>nil</b>.
+or with <b>null</b> in an empty table,
+<code>next</code> returns <b>null</b>.
+If the second argument is absent, then it is interpreted as <b>null</b>.
 In particular,
 you can use <code>next(t)</code> to check whether a table is empty.
 
@@ -7494,11 +7545,11 @@ results from the call.
 
 <p>
 Otherwise,
-returns three values: the <a href="#pdf-next"><code>next</code></a> function, the table <code>t</code>, and <b>nil</b>,
+returns three values: the <a href="#pdf-next"><code>next</code></a> function, the table <code>t</code>, and <b>null</b>,
 so that the construction
 
 <pre>
-     for k,v in pairs(t) do <em>body</em> end
+     for( k,v in pairs(t) ) { <em>body</em> }
 </pre><p>
 will iterate over all key&ndash;value pairs of table <code>t</code>.
 
@@ -7577,7 +7628,7 @@ Returns an integer.
 Sets the real value of <code>table[index]</code> to <code>value</code>,
 without invoking the <code>__newindex</code> metamethod.
 <code>table</code> must be a table,
-<code>index</code> any value different from <b>nil</b> and NaN,
+<code>index</code> any value different from <b>null</b> and NaN,
 and <code>value</code> any Lua value.
 
 
@@ -7609,7 +7660,7 @@ and <code>select</code> returns the total number of extra arguments it received.
 Sets the metatable for the given table.
 (To change the metatable of other types from Lua code,
 you must use the debug library (<a href="#6.10">&sect;6.10</a>).)
-If <code>metatable</code> is <b>nil</b>,
+If <code>metatable</code> is <b>null</b>,
 removes the metatable of the given table.
 If the original metatable has a <code>__metatable</code> field,
 raises an error.
@@ -7631,7 +7682,7 @@ When called with no <code>base</code>,
 If the argument is already a number or
 a string convertible to a number,
 then <code>tonumber</code> returns this number;
-otherwise, it returns <b>nil</b>.
+otherwise, it returns <b>null</b>.
 
 
 <p>
@@ -7649,7 +7700,7 @@ In bases above&nbsp;10, the letter '<code>A</code>' (in either upper or lower ca
 represents&nbsp;10, '<code>B</code>' represents&nbsp;11, and so forth,
 with '<code>Z</code>' representing 35.
 If the string <code>e</code> is not a valid numeral in the given base,
-the function returns <b>nil</b>.
+the function returns <b>null</b>.
 
 
 
@@ -7675,7 +7726,7 @@ and uses the result of the call as its result.
 <hr><h3><a name="pdf-type"><code>type (v)</code></a></h3>
 Returns the type of its only argument, coded as a string.
 The possible results of this function are
-"<code>nil</code>" (a string, not the value <b>nil</b>),
+"<code>null</code>" (a string, not the value <b>null</b>),
 "<code>number</code>",
 "<code>string</code>",
 "<code>boolean</code>",
@@ -7886,9 +7937,9 @@ Once a loader is found,
 <code>modname</code> and an extra value dependent on how it got the loader.
 (If the loader came from a file,
 this extra value is the file name.)
-If the loader returns any non-nil value,
+If the loader returns any non-null value,
 <code>require</code> assigns the returned value to <code>package.loaded[modname]</code>.
-If the loader does not return a non-nil value and
+If the loader does not return a non-null value and
 has not assigned any value to <code>package.loaded[modname]</code>,
 then <code>require</code> assigns <b>true</b> to this entry.
 In any case, <code>require</code> returns the
@@ -8024,8 +8075,8 @@ The path used by <a href="#pdf-require"><code>require</code></a> to search for a
 
 <p>
 At start-up, Lua initializes this variable with
-the value of the environment variable <a name="pdf-LUA_PATH_5_3"><code>LUA_PATH_5_3</code></a> or
-the environment variable <a name="pdf-LUA_PATH"><code>LUA_PATH</code></a> or
+the value of the environment variable <a name="pdf-LUA_PATH_5_3"><code>LJS_PATH_5_3</code></a> or
+the environment variable <a name="pdf-LUA_PATH"><code>LJS_PATH</code></a> or
 with a default path defined in <code>luaconf.h</code>,
 if those environment variables are not defined.
 Any "<code>;;</code>" in the value of the environment variable
@@ -8068,7 +8119,7 @@ sole parameter.
 The function can return another function (the module <em>loader</em>)
 plus an extra value that will be passed to that loader,
 or a string explaining why it did not find that module
-(or <b>nil</b> if it has nothing to say).
+(or <b>null</b> if it has nothing to say).
 
 
 <p>
@@ -8162,18 +8213,18 @@ and then tries to open the resulting file name.
 For instance, if the path is the string
 
 <pre>
-     "./?.lua;./?.lc;/usr/local/?/init.lua"
+     "./?.ljs;./?.lc;/usr/local/?/init.ljs"
 </pre><p>
 the search for the name <code>foo.a</code>
 will try to open the files
-<code>./foo/a.lua</code>, <code>./foo/a.lc</code>, and
-<code>/usr/local/foo/a/init.lua</code>, in that order.
+<code>./foo/a.ljs</code>, <code>./foo/a.lc</code>, and
+<code>/usr/local/foo/a/init.ljs</code>, in that order.
 
 
 <p>
 Returns the resulting name of the first file that it can
 open in read mode (after closing the file),
-or <b>nil</b> plus an error message if none succeeds.
+or <b>null</b> plus an error message if none succeeds.
 (This error message lists all file names it tried to open.)
 
 
@@ -8187,7 +8238,7 @@ or <b>nil</b> plus an error message if none succeeds.
 <p>
 This library provides generic functions for string manipulation,
 such as finding and extracting substrings, and pattern matching.
-When indexing a string in Lua, the first character is at position&nbsp;1
+When indexing a string in LJS, the first character is at position&nbsp;1
 (not at&nbsp;0, as in C).
 Indices are allowed to be negative and are interpreted as indexing backwards,
 from the end of the string.
@@ -8201,7 +8252,7 @@ It also sets a metatable for strings
 where the <code>__index</code> field points to the <code>string</code> table.
 Therefore, you can use the string functions in object-oriented style.
 For instance, <code>string.byte(s,i)</code>
-can be written as <code>s:byte(i)</code>.
+can be written as <code>s->byte(i)</code>.
 
 
 <p>
@@ -8257,7 +8308,7 @@ to save space.
 <p>
 Functions with upvalues have only their number of upvalues saved.
 When (re)loaded,
-those upvalues receive fresh instances containing <b>nil</b>.
+those upvalues receive fresh instances containing <b>null</b>.
 (You can use the debug library to serialize
 and reload the upvalues of a function
 in a way adequate to your needs.)
@@ -8274,7 +8325,7 @@ Looks for the first match of
 <code>pattern</code> (see <a href="#6.4.1">&sect;6.4.1</a>) in the string <code>s</code>.
 If it finds a match, then <code>find</code> returns the indices of&nbsp;<code>s</code>
 where this occurrence starts and ends;
-otherwise, it returns <b>nil</b>.
+otherwise, it returns <b>null</b>.
 A third, optional numeric argument <code>init</code> specifies
 where to start the search;
 its default value is&nbsp;1 and can be negative.
@@ -8362,20 +8413,20 @@ will iterate over all the words from string <code>s</code>,
 printing one per line:
 
 <pre>
-     s = "hello world from Lua"
-     for w in string.gmatch(s, "%a+") do
-       print(w)
-     end
+     s = "hello world from Lua";
+     for( w in string.gmatch(s, "%a+") ) {
+       print(w);
+     }
 </pre><p>
 The next example collects all pairs <code>key=value</code> from the
 given string into a table:
 
 <pre>
-     t = {}
-     s = "from=world, to=Lua"
-     for k, v in string.gmatch(s, "(%w+)=(%w+)") do
-       t[k] = v
-     end
+     t = {};
+     s = "from=world, to=Lua";
+     for( k, v in string.gmatch(s, "(%w+)=(%w+)") ) {
+       t[k] = v;
+     }
 </pre>
 
 <p>
@@ -8428,7 +8479,7 @@ then it behaves as if the whole pattern was inside a capture.
 If the value returned by the table query or by the function call
 is a string or a number,
 then it is used as the replacement string;
-otherwise, if it is <b>false</b> or <b>nil</b>,
+otherwise, if it is <b>false</b> or <b>null</b>,
 then there is no replacement
 (that is, the original match is kept in the string).
 
@@ -8437,26 +8488,26 @@ then there is no replacement
 Here are some examples:
 
 <pre>
-     x = string.gsub("hello world", "(%w+)", "%1 %1")
-     --&gt; x="hello hello world world"
+     x = string.gsub("hello world", "(%w+)", "%1 %1");
+     //&gt; x="hello hello world world"
      
-     x = string.gsub("hello world", "%w+", "%0 %0", 1)
-     --&gt; x="hello hello world"
+     x = string.gsub("hello world", "%w+", "%0 %0", 1);
+     //&gt; x="hello hello world"
      
-     x = string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
-     --&gt; x="world hello Lua from"
+     x = string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1");
+     //&gt; x="world hello Lua from"
      
      x = string.gsub("home = $HOME, user = $USER", "%$(%w+)", os.getenv)
      --&gt; x="home = /home/roberto, user = roberto"
      
-     x = string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
-           return load(s)()
-         end)
-     --&gt; x="4+5 = 9"
+     x = string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s) {
+           return load(s)();
+         });
+     //&gt; x="4+5 = 9"
      
-     local t = {name="lua", version="5.3"}
-     x = string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
-     --&gt; x="lua-5.3.tar.gz"
+     var t = {name="lua", version="5.3"};
+     x = string.gsub("$name-$version.tar.gz", "%$(%w+)", t);
+     //&gt; x="lua-5.3.tar.gz"
 </pre>
 
 
@@ -8487,7 +8538,7 @@ Looks for the first <em>match</em> of
 <code>pattern</code> (see <a href="#6.4.1">&sect;6.4.1</a>) in the string <code>s</code>.
 If it finds one, then <code>match</code> returns
 the captures from the pattern;
-otherwise it returns <b>nil</b>.
+otherwise it returns <b>null</b>.
 If <code>pattern</code> specifies no captures,
 then the whole match is returned.
 A third, optional numeric argument <code>init</code> specifies
@@ -8990,7 +9041,7 @@ so that <code>utf8.offset(s, -n)</code> gets the offset of the
 <code>n</code>-th character from the end of the string.
 If the specified character is neither in the subject
 nor right after its end,
-the function returns <b>nil</b>.
+the function returns <b>null</b>.
 
 
 <p>
@@ -9149,7 +9200,7 @@ Returns the elements from the given list.
 This function is equivalent to
 
 <pre>
-     return list[i], list[i+1], &middot;&middot;&middot;, list[j]
+     return list[i], list[i+1], &middot;&middot;&middot;, list[j];
 </pre><p>
 By default, <code>i</code> is&nbsp;1 and <code>j</code> is <code>#list</code>.
 
@@ -9447,7 +9498,7 @@ Returns the tangent of <code>x</code> (assumed to be in radians).
 <p>
 If the value <code>x</code> is convertible to an integer,
 returns that integer.
-Otherwise, returns <b>nil</b>.
+Otherwise, returns <b>null</b>.
 
 
 
@@ -9459,7 +9510,7 @@ Otherwise, returns <b>nil</b>.
 <p>
 Returns "<code>integer</code>" if <code>x</code> is an integer,
 "<code>float</code>" if it is a float,
-or <b>nil</b> if <code>x</code> is not a number.
+or <b>null</b> if <code>x</code> is not a number.
 
 
 
@@ -9507,10 +9558,10 @@ The I/O library never closes these files.
 
 <p>
 Unless otherwise stated,
-all I/O functions return <b>nil</b> on failure
+all I/O functions return <b>null</b> on failure
 (plus an error message as a second result and
 a system-dependent error code as a third result)
-and some value different from <b>nil</b> on success.
+and some value different from <b>null</b> on success.
 In non-POSIX systems,
 the computation of the error message and error code
 in case of errors
@@ -9648,7 +9699,7 @@ or to write data to this program
 
 
 <p>
-Equivalent to <code>io.input():read(&middot;&middot;&middot;)</code>.
+Equivalent to <code>io.input()->read(&middot;&middot;&middot;)</code>.
 
 
 
@@ -9674,7 +9725,7 @@ and it is automatically removed when the program ends.
 Checks whether <code>obj</code> is a valid file handle.
 Returns the string <code>"file"</code> if <code>obj</code> is an open file handle,
 <code>"closed file"</code> if <code>obj</code> is a closed file handle,
-or <b>nil</b> if <code>obj</code> is not a file handle.
+or <b>null</b> if <code>obj</code> is not a file handle.
 
 
 
@@ -9684,13 +9735,13 @@ or <b>nil</b> if <code>obj</code> is not a file handle.
 
 
 <p>
-Equivalent to <code>io.output():write(&middot;&middot;&middot;)</code>.
+Equivalent to <code>io.output()->write(&middot;&middot;&middot;)</code>.
 
 
 
 
 <p>
-<hr><h3><a name="pdf-file:close"><code>file:close ()</code></a></h3>
+<hr><h3><a name="pdf-file:close"><code>file->close ()</code></a></h3>
 
 
 <p>
@@ -9702,14 +9753,14 @@ but that takes an unpredictable amount of time to happen.
 
 <p>
 When closing a file handle created with <a href="#pdf-io.popen"><code>io.popen</code></a>,
-<a href="#pdf-file:close"><code>file:close</code></a> returns the same values
+<a href="#pdf-file:close"><code>file->close</code></a> returns the same values
 returned by <a href="#pdf-os.execute"><code>os.execute</code></a>.
 
 
 
 
 <p>
-<hr><h3><a name="pdf-file:flush"><code>file:flush ()</code></a></h3>
+<hr><h3><a name="pdf-file:flush"><code>file->flush ()</code></a></h3>
 
 
 <p>
@@ -9719,7 +9770,7 @@ Saves any written data to <code>file</code>.
 
 
 <p>
-<hr><h3><a name="pdf-file:lines"><code>file:lines (&middot;&middot;&middot;)</code></a></h3>
+<hr><h3><a name="pdf-file:lines"><code>file->lines (&middot;&middot;&middot;)</code></a></h3>
 
 
 <p>
@@ -9731,7 +9782,7 @@ uses "<code>l</code>" as a default.
 As an example, the construction
 
 <pre>
-     for c in file:lines(1) do <em>body</em> end
+     for( c in file->lines(1) ) { <em>body</em> }
 </pre><p>
 will iterate over all characters of the file,
 starting at the current position.
@@ -9747,7 +9798,7 @@ instead of returning an error code.
 
 
 <p>
-<hr><h3><a name="pdf-file:read"><code>file:read (&middot;&middot;&middot;)</code></a></h3>
+<hr><h3><a name="pdf-file:read"><code>file->read (&middot;&middot;&middot;)</code></a></h3>
 
 
 <p>
@@ -9755,7 +9806,7 @@ Reads the file <code>file</code>,
 according to the given formats, which specify what to read.
 For each format,
 the function returns a string or a number with the characters read,
-or <b>nil</b> if it cannot read data with the specified format.
+or <b>null</b> if it cannot read data with the specified format.
 (In this latter case,
 the function does not read subsequent formats.)
 When called without formats,
@@ -9776,7 +9827,7 @@ This format always reads the longest input sequence that
 is a valid prefix for a numeral;
 if that prefix does not form a valid numeral
 (e.g., an empty string, "<code>0x</code>", or "<code>3.4e-</code>"),
-it is discarded and the function returns <b>nil</b>.
+it is discarded and the function returns <b>null</b>.
 </li>
 
 <li><b>"<code>a</code>": </b>
@@ -9786,21 +9837,21 @@ On end of file, it returns the empty string.
 
 <li><b>"<code>l</code>": </b>
 reads the next line skipping the end of line,
-returning <b>nil</b> on end of file.
+returning <b>null</b> on end of file.
 This is the default format.
 </li>
 
 <li><b>"<code>L</code>": </b>
 reads the next line keeping the end-of-line character (if present),
-returning <b>nil</b> on end of file.
+returning <b>null</b> on end of file.
 </li>
 
 <li><b><em>number</em>: </b>
 reads a string with up to this number of bytes,
-returning <b>nil</b> on end of file.
+returning <b>null</b> on end of file.
 If <code>number</code> is zero,
 it reads nothing and returns an empty string,
-or <b>nil</b> on end of file.
+or <b>null</b> on end of file.
 </li>
 
 </ul><p>
@@ -9810,7 +9861,7 @@ The formats "<code>l</code>" and "<code>L</code>" should be used only for text f
 
 
 <p>
-<hr><h3><a name="pdf-file:seek"><code>file:seek ([whence [, offset]])</code></a></h3>
+<hr><h3><a name="pdf-file:seek"><code>file->seek ([whence [, offset]])</code></a></h3>
 
 
 <p>
@@ -9826,25 +9877,25 @@ specified by the string <code>whence</code>, as follows:
 </ul><p>
 In case of success, <code>seek</code> returns the final file position,
 measured in bytes from the beginning of the file.
-If <code>seek</code> fails, it returns <b>nil</b>,
+If <code>seek</code> fails, it returns <b>null</b>,
 plus a string describing the error.
 
 
 <p>
 The default value for <code>whence</code> is <code>"cur"</code>,
 and for <code>offset</code> is 0.
-Therefore, the call <code>file:seek()</code> returns the current
+Therefore, the call <code>file->seek()</code> returns the current
 file position, without changing it;
-the call <code>file:seek("set")</code> sets the position to the
+the call <code>file->seek("set")</code> sets the position to the
 beginning of the file (and returns 0);
-and the call <code>file:seek("end")</code> sets the position to the
+and the call <code>file->seek("end")</code> sets the position to the
 end of the file, and returns its size.
 
 
 
 
 <p>
-<hr><h3><a name="pdf-file:setvbuf"><code>file:setvbuf (mode [, size])</code></a></h3>
+<hr><h3><a name="pdf-file:setvbuf"><code>file->setvbuf (mode [, size])</code></a></h3>
 
 
 <p>
@@ -9878,7 +9929,7 @@ The default is an appropriate size.
 
 
 <p>
-<hr><h3><a name="pdf-file:write"><code>file:write (&middot;&middot;&middot;)</code></a></h3>
+<hr><h3><a name="pdf-file:write"><code>file->write (&middot;&middot;&middot;)</code></a></h3>
 
 
 <p>
@@ -9888,7 +9939,7 @@ The arguments must be strings or numbers.
 
 <p>
 In case of success, this function returns <code>file</code>.
-Otherwise it returns <b>nil</b> plus a string describing the error.
+Otherwise it returns <b>null</b> plus a string describing the error.
 
 
 
@@ -9988,7 +10039,7 @@ This function is equivalent to the ISO&nbsp;C function <code>system</code>.
 It passes <code>command</code> to be executed by an operating system shell.
 Its first result is <b>true</b>
 if the command terminated successfully,
-or <b>nil</b> otherwise.
+or <b>null</b> otherwise.
 After this first result
 the function returns a string plus a number,
 as follows:
@@ -10042,7 +10093,7 @@ closes the Lua state before exiting.
 
 <p>
 Returns the value of the process environment variable <code>varname</code>,
-or <b>nil</b> if the variable is not defined.
+or <b>null</b> if the variable is not defined.
 
 
 
@@ -10054,7 +10105,7 @@ or <b>nil</b> if the variable is not defined.
 <p>
 Deletes the file (or empty directory, on POSIX systems)
 with the given name.
-If this function fails, it returns <b>nil</b>,
+If this function fails, it returns <b>null</b>,
 plus a string describing the error and the error code.
 Otherwise, it returns true.
 
@@ -10067,7 +10118,7 @@ Otherwise, it returns true.
 
 <p>
 Renames the file or directory named <code>oldname</code> to <code>newname</code>.
-If this function fails, it returns <b>nil</b>,
+If this function fails, it returns <b>null</b>,
 plus a string describing the error and the error code.
 Otherwise, it returns true.
 
@@ -10086,7 +10137,7 @@ Sets the current locale of the program.
 <code>"monetary"</code>, <code>"numeric"</code>, or <code>"time"</code>;
 the default category is <code>"all"</code>.
 The function returns the name of the new locale,
-or <b>nil</b> if the request cannot be honored.
+or <b>null</b> if the request cannot be honored.
 
 
 <p>
@@ -10097,7 +10148,7 @@ the current locale is set to the standard C locale.
 
 
 <p>
-When called with <b>nil</b> as the first argument,
+When called with <b>null</b> as the first argument,
 this function only returns the name of the current locale
 for the given category.
 
@@ -10121,7 +10172,7 @@ and may have fields
 <code>hour</code> (default is 12),
 <code>min</code> (default is 0),
 <code>sec</code> (default is 0),
-and <code>isdst</code> (default is <b>nil</b>).
+and <code>isdst</code> (default is <b>null</b>).
 Other fields are ignored.
 For a description of these fields, see the <a href="#pdf-os.date"><code>os.date</code></a> function.
 
@@ -10252,7 +10303,7 @@ level&nbsp;1 is the function that called <code>getinfo</code>
 (except for tail calls, which do not count on the stack);
 and so on.
 If <code>f</code> is a number larger than the number of active functions,
-then <code>getinfo</code> returns <b>nil</b>.
+then <code>getinfo</code> returns <b>null</b>.
 
 
 <p>
@@ -10298,7 +10349,7 @@ counting only the variables that are active
 in the current scope of the function.
 Negative indices refer to vararg arguments;
 -1 is the first vararg argument.
-The function returns <b>nil</b> if there is no variable with the given index,
+The function returns <b>null</b> if there is no variable with the given index,
 and raises an error when called with a level out of range.
 (You can call <a href="#pdf-debug.getinfo"><code>debug.getinfo</code></a> to check whether the level is valid.)
 
@@ -10323,7 +10374,7 @@ In that case, <code>getlocal</code> returns only the name of function parameters
 
 <p>
 Returns the metatable of the given <code>value</code>
-or <b>nil</b> if it does not have a metatable.
+or <b>null</b> if it does not have a metatable.
 
 
 
@@ -10345,7 +10396,7 @@ Returns the registry table (see <a href="#4.5">&sect;4.5</a>).
 <p>
 This function returns the name and the value of the upvalue
 with index <code>up</code> of the function <code>f</code>.
-The function returns <b>nil</b> if there is no upvalue with the given index.
+The function returns <b>null</b> if there is no upvalue with the given index.
 
 
 <p>
@@ -10363,7 +10414,7 @@ represent variables with no known names
 <p>
 Returns the Lua value associated to <code>u</code>.
 If <code>u</code> is not a full userdata,
-returns <b>nil</b>.
+returns <b>null</b>.
 
 
 
@@ -10418,7 +10469,7 @@ and level&nbsp;1 is the hook function).
 <p>
 This function assigns the value <code>value</code> to the local variable
 with index <code>local</code> of the function at level <code>level</code> of the stack.
-The function returns <b>nil</b> if there is no local
+The function returns <b>null</b> if there is no local
 variable with the given index,
 and raises an error when called with a <code>level</code> out of range.
 (You can call <code>getinfo</code> to check whether the level is valid.)
@@ -10438,7 +10489,7 @@ variable indices and names.
 
 <p>
 Sets the metatable for the given <code>value</code> to the given <code>table</code>
-(which can be <b>nil</b>).
+(which can be <b>null</b>).
 Returns <code>value</code>.
 
 
@@ -10451,7 +10502,7 @@ Returns <code>value</code>.
 <p>
 This function assigns the value <code>value</code> to the upvalue
 with index <code>up</code> of the function <code>f</code>.
-The function returns <b>nil</b> if there is no upvalue
+The function returns <b>null</b> if there is no upvalue
 with the given index.
 Otherwise, it returns the name of the upvalue.
 
@@ -10479,7 +10530,7 @@ Returns <code>udata</code>.
 
 
 <p>
-If <code>message</code> is present but is neither a string nor <b>nil</b>,
+If <code>message</code> is present but is neither a string nor <b>null</b>,
 this function returns <code>message</code> without further processing.
 Otherwise,
 it returns a string with a traceback of the call stack.
@@ -10563,8 +10614,8 @@ and as <code>lua -</code> otherwise.
 
 <p>
 When called without option <code>-E</code>,
-the interpreter checks for an environment variable <a name="pdf-LUA_INIT_5_3"><code>LUA_INIT_5_3</code></a>
-(or <a name="pdf-LUA_INIT"><code>LUA_INIT</code></a> if the versioned name is not defined)
+the interpreter checks for an environment variable <a name="pdf-LUA_INIT_5_3"><code>LJS_INIT_5_3</code></a>
+(or <a name="pdf-LUA_INIT"><code>LJS_INIT</code></a> if the versioned name is not defined)
 before running any argument.
 If the variable content has the format <code>@<em>filename</em></code>,
 then <code>lua</code> executes the file.
@@ -10573,7 +10624,7 @@ Otherwise, <code>lua</code> executes the string itself.
 
 <p>
 When called with option <code>-E</code>,
-besides ignoring <code>LUA_INIT</code>,
+besides ignoring <code>LJS_INIT</code>,
 Lua also ignores
 the values of <code>LUA_PATH</code> and <code>LUA_CPATH</code>,
 setting the values of
@@ -10586,7 +10637,7 @@ All options are handled in order, except <code>-i</code> and <code>-E</code>.
 For instance, an invocation like
 
 <pre>
-     $ lua -e'a=1' -e 'print(a)' script.lua
+     $ ljs -e'a=1' -e 'print(a)' script.lua
 </pre><p>
 will first set <code>a</code> to 1, then print the value of <code>a</code>,
 and finally run the file <code>script.lua</code> with no arguments.
@@ -10595,7 +10646,7 @@ and finally run the file <code>script.lua</code> with no arguments.
 
 <p>
 Before running any code,
-<code>lua</code> collects all command-line arguments
+<code>ljs</code> collects all command-line arguments
 in a global table called <code>arg</code>.
 The script name goes to index 0,
 the first argument after the script name goes to index 1,
@@ -10606,13 +10657,13 @@ go to negative indices.
 For instance, in the call
 
 <pre>
-     $ lua -la b.lua t1 t2
+     $ ljs -la b.ljs t1 t2
 </pre><p>
 the table is like this:
 
 <pre>
-     arg = { [-2] = "lua", [-1] = "-la",
-             [0] = "b.lua",
+     arg = { [-2] = "ljs", [-1] = "-la",
+             [0] = "b.ljs",
              [1] = "t1", [2] = "t2" }
 </pre><p>
 If there is no script in the call,
@@ -10621,21 +10672,21 @@ followed by the other arguments.
 For instance, the call
 
 <pre>
-     $ lua -e "print(arg[1])"
+     $ ljs -e "print(arg[1])"
 </pre><p>
 will print "<code>-e</code>".
 If there is a script,
 the script is called with arguments
 <code>arg[1]</code>, &middot;&middot;&middot;, <code>arg[#arg]</code>.
-(Like all chunks in Lua,
+(Like all chunks in LJS,
 the script is compiled as a vararg function.)
 
 
 <p>
 In interactive mode,
-Lua repeatedly prompts and waits for a line.
+LJS repeatedly prompts and waits for a line.
 After reading a line,
-Lua first try to interpret the line as an expression.
+LJS first try to interpret the line as an expression.
 If it succeeds, it prints its value.
 Otherwise, it interprets the line as a statement.
 If you write an incomplete statement,
@@ -10670,24 +10721,24 @@ calling <a href="#pdf-os.exit"><code>os.exit</code></a> to terminate.
 
 
 <p>
-To allow the use of Lua as a
+To allow the use of LJS as a
 script interpreter in Unix systems,
 the standalone interpreter skips
 the first line of a chunk if it starts with <code>#</code>.
-Therefore, Lua scripts can be made into executable programs
+Therefore, LJS scripts can be made into executable programs
 by using <code>chmod +x</code> and the&nbsp;<code>#!</code> form,
 as in
 
 <pre>
-     #!/usr/local/bin/lua
+     #!/usr/local/bin/ljs
 </pre><p>
 (Of course,
 the location of the Lua interpreter may be different in your machine.
-If <code>lua</code> is in your <code>PATH</code>,
+If <code>ljs</code> is in your <code>PATH</code>,
 then
 
 <pre>
-     #!/usr/bin/env lua
+     #!/usr/bin/env ljs
 </pre><p>
 is a more portable solution.)
 
@@ -10929,7 +10980,7 @@ and LiteralString, see <a href="#3.1">&sect;3.1</a>.)
 
 	explist ::= exp {&lsquo;<b>,</b>&rsquo; exp}
 
-	exp ::=  <b>nil</b> | <b>false</b> | <b>true</b> | Numeral | LiteralString | &lsquo;<b>...</b>&rsquo; | functiondef | 
+	exp ::=  <b>null</b> | <b>false</b> | <b>true</b> | Numeral | LiteralString | &lsquo;<b>...</b>&rsquo; | functiondef | 
 		 prefixexp | tableconstructor | exp binop exp | unop exp 
 
 	prefixexp ::= var | functioncall | &lsquo;<b>(</b>&rsquo; exp &lsquo;<b>)</b>&rsquo;
