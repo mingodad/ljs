@@ -161,7 +161,14 @@ static void checkname (LexState *ls, expdesc *e) {
 static int registerlocalvar (LexState *ls, TString *varname) {
   FuncState *fs = ls->fs;
   Proto *f = fs->f;
-  int oldsize = f->sizelocvars;
+  int vidx, vidxmax, oldsize = f->sizelocvars;
+  vidx = fs->bl ? fs->bl->nactvar : fs->firstlocal;
+  vidxmax = fs->nactvar ? fs->nactvar : fs->nlocvars;
+  for(; vidx < vidxmax; ++vidx) {
+    if(eqstr(f->locvars[vidx].varname, varname))
+      luaX_syntaxerror(ls, luaO_pushfstring(ls->L,
+             "Name [%s] already declared", getstr(varname)));
+  }
   luaM_growvector(ls->L, f->locvars, fs->nlocvars, f->sizelocvars,
                   LocVar, SHRT_MAX, "local variables");
   while (oldsize < f->sizelocvars)
