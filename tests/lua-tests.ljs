@@ -514,7 +514,7 @@ lrun("calls", function() {
 	lok(a == 23 && (function (x) { return x*2; })(20) == 40);
 
 
-	var x,y,z,a;
+	var x,y,z;
 	a = {}; lim = 2000;
 	for( i=1, lim ) { a[i]=i; }
 	lok(select(lim, unpack(a)) == lim && select('#', unpack(a)) == lim);
@@ -599,7 +599,8 @@ lrun("calls", function() {
 	function f() { return 1,2,30,4; }
 	function ret2 (a,b) { return a,b; }
 
-	var a,b,c,d = unlpack({1,2,3});
+	var b,c,d;
+	a,b,c,d = unlpack({1,2,3});
 	lok(a==1 && b==2 && c==3 && d==null);
 	a = {1,2,3,4,false,10,'alo',false,assert};
 	equaltab(pack(unlpack(a)), a);
@@ -647,7 +648,7 @@ lrun("calls", function() {
 	lok(a() == 1 && _G.x == 1);
 
 	i = 0;
-	var a, b = load(read1("*a = 123"));
+	a, b = load(read1("*a = 123"));
 	lok(! a && type(b) == "string" && i == 2);
 
 	a, b = load(function () { error("hhi"); });
@@ -670,7 +671,7 @@ lrun("calls", function() {
 
 
 	// test for dump/undump with upvalues
-	var a, b = 20, 30;
+	a, b = 20, 30;
 	x = loadstring(string.dump(function (x) {
 	  if( x == "set" ) { a = 10+b; b += 1; } else {
 	  return a;
@@ -878,7 +879,8 @@ lrun("closures", function() {
 			f = coroutine.wrap(foo);
 			var a = {};
 			lok(f(a) == _G);
-			var a,b = pcall(f);
+			var b;
+			a,b = pcall(f);
 			lok(a && b == _G);
 		}
 	}
@@ -907,7 +909,7 @@ lrun("closures", function() {
 	f = coroutine.create(foo);
 	lok(type(f) == "thread" && coroutine.status(f) == "suspended");
 	lok(string.find(tostring(f), "thread"));
-	var s,a,b,c,d;
+	var c,d;
 	s,a,b,c,d = coroutine.resume(f, {1,2,3}, {}, {1}, {'a', 'b', 'c'});
 	lok(s && a == null && coroutine.status(f) == "suspended");
 	s,a,b,c,d = coroutine.resume(f);
@@ -942,7 +944,7 @@ lrun("closures", function() {
 	}
 
 	f = coroutine.wrap(pf);
-	var s=1;
+	s=1;
 	for( i=1,10 ) {
 	  lok(f(1, 1) == s);
 	  s *= i;
@@ -967,7 +969,7 @@ lrun("closures", function() {
 	}
 
 	var x = gen(100);
-	var a = {};
+	a = {};
 	while( 1 ) {
 	  var n = x();
 	  if( n == null ) { break; }
@@ -989,7 +991,7 @@ lrun("closures", function() {
 	function goo() { foo(); }
 	x = coroutine.wrap(goo);
 	lok(x() == 3);
-	var a,b = pcall(x);
+	a,b = pcall(x);
 	lok(! a && b == foo);
 
 	x = coroutine.create(goo);
@@ -1012,7 +1014,7 @@ lrun("closures", function() {
 	  }
 	}
 
-	var a = 0;
+	a = 0;
 	for( t in coroutine.wrap(function () { all({}, 5, 4); }) ) {
 	  a += 1;
 	}
@@ -1021,7 +1023,7 @@ lrun("closures", function() {
 
 	// access to locals of collected corroutines
 	var C = {}; setmetatable(C, {__mode = "kv"});
-	var x = coroutine.wrap (function () {
+	x = coroutine.wrap (function () {
 		    var a = 10;
 		    var function f () { a += 10; return a; }
 		    while( true ) {
@@ -1032,7 +1034,7 @@ lrun("closures", function() {
 
 	C[1] = x;
 
-	var f = x();
+	f = x();
 	lok(f() == 21 && x()() == 32 && x() == f);
 	x = null;
 	collectgarbage();
@@ -1050,13 +1052,13 @@ lrun("closures", function() {
 	}
 
 	var co = coroutine.create(co_func);
-	var a,b = coroutine.resume(co, co);
+	a,b = coroutine.resume(co, co);
 	lok(a == true && b == 10);
 	lok(coroutine.resume(co, co) == false);
 	lok(coroutine.resume(co, co) == false);
 
 	// access to locals of erroneous coroutines
-	var x = coroutine.create (function () {
+	x = coroutine.create (function () {
 		    var a = 10;
 		    _G.f = function () { a+=1; return a; };
 		    error('x');
@@ -1356,7 +1358,7 @@ lrun("metatables", function() {
 
 
 	// test comparison compatibilities
-	var t1, t2, c, d;
+	var t1, t2, d;
 	t1 = {};  c = {}; setmetatable(c, t1);
 	d = {};
 	t1.__eq = function () { return true; };
@@ -1385,9 +1387,9 @@ lrun("metatables", function() {
 	  }
 	};
 
-	var a = setmetatable({}, tt);
-	var b = setmetatable({f=a}, tt);
-	var c = setmetatable({f=b}, tt);
+	a = setmetatable({}, tt);
+	b = setmetatable({f=a}, tt);
+	c = setmetatable({f=b}, tt);
 
 	i = 0;
 	x = c(3,4,5);
@@ -1686,7 +1688,7 @@ lrun("tables,next,for", function() {
 	}
 
 	// testing constructor sizes
-	var lim = 40;
+	lim = 40;
 	var s = 'return {';
 	for( i=1,lim ) {
 	  s = s..i..',';
@@ -1701,7 +1703,7 @@ lrun("tables,next,for", function() {
 
 
 	// tests with unknown number of elements
-	var a = {};
+	a = {};
 	for( i=1,lim ) { a[i] = i; }   // build auxiliary table
 	for( k=0,lim ) {
 	  var a = {unpack(a,1,k)};
@@ -1714,8 +1716,8 @@ lrun("tables,next,for", function() {
 
 
 	// testing tables dynamically built
-	var lim = 130;
-	var a = {}; a[2] = 1; check(a, 0, 1);
+	lim = 130;
+	a = {}; a[2] = 1; check(a, 0, 1);
 	a = {}; a[0] = 1; check(a, 0, 1); a[2] = 1; check(a, 0, 2);
 	a = {}; a[0] = 1; a[1] = 1; check(a, 1, 1);
 	a = {};
@@ -1763,7 +1765,7 @@ lrun("tables,next,for", function() {
 	  arg.x = true;
 	  check(arg, mp2(n+1), 1);
 	}
-	var a = {};
+	a = {};
 	for( i=1,lim ) { a[i] = true; foo(i, unpack(a)); }
 
 	}
@@ -2226,7 +2228,7 @@ lrun("pattern matching", function() {
 	lok(! pcall(string.gsub, "alo", "(%0)", "a"));
 
 	// big strings
-	var a = string.rep('a', 300000);
+	a = string.rep('a', 300000);
 	lok(string.find(a, '^a*.?$'));
 	lok(! string.find(a, '^a*.?b$'));
 	lok(string.find(a, '^a-.?$'));
@@ -2254,7 +2256,7 @@ lrun("pattern matching", function() {
 
 	// tests for gmatch
 	//lok(string.gfind == string.gmatch)
-	var a = 0;
+	a = 0;
 	for( i in string.gmatch('abcde', '()') ) { lok(i == a+1); a=i; }
 	lok(a==6);
 
@@ -2288,12 +2290,13 @@ lrun("pattern matching", function() {
 	lok(string.gsub("function", "%f[\1-\255]%w", ".") == ".unction");
 	lok(string.gsub("function", "%f[^\1-\255]", ".") == "function.");
 
-	var i, e = string.find(" alo aalo allo", "%f[%S].-%f[%s].-%f[%S]");
+	var i;
+	i, e = string.find(" alo aalo allo", "%f[%S].-%f[%s].-%f[%S]");
 	lok(i == 2 && e == 5);
 	var k = string.match(" alo aalo allo", "%f[%S](.-%f[%s].-%f[%S])");
 	lok(k == 'alo ');
 
-	var a = {1, 5, 9, 14, 17,};
+	a = {1, 5, 9, 14, 17,};
 	for( k in string.gmatch("alo alo th02 is 1hat", "()%f[%w%d]") ) {
 	  lok(table.remove(a, 1) == k);
 	}
@@ -2445,7 +2448,8 @@ lrun("vararg", function() {
 	lok(t->f(1,4) == 3 && t->f(2) == 11);
 
 	lim = 20;
-	var i, a = 1, {};
+	var i;
+	i, a = 1, {};
 	while( i <= lim ) { a[i] = i+0.3; i+=1; }
 
 	function f(a, b, c, d, ...) {
