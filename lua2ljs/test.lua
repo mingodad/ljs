@@ -181,6 +181,9 @@ lfequal = function(a, b)
     end
 end
 
+local k
+local s = format(0 < k and k < 0x1p-1026 and "%+a" or "%+.14g", k)
+
 if 1 == 2 then
   print("1 == 2");
 end

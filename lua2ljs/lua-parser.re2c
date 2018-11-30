@@ -35,6 +35,9 @@ regular:
 
   NUMBER   = ( D+ | D* "." D+ | D+ "." D* ) E? ;
 
+  HEX_P    = [Pp] [+-]? D+ ;
+  HEXNUM = ('0' [xX] [0-9a-fA-F]+) HEX_P?;
+
   WS       = [ \t\r\v\f] ;
   LF       = [\n] ;
   END      = [\000] ;
@@ -134,6 +137,7 @@ regular:
 
   //types
   NUMBER           { return TK_NUMBER; }
+  HEXNUM           { return TK_NUMBER; }
   STRING1          { return TK_STRING; }
   STRING2          { return TK_STRING; }
 
@@ -354,7 +358,7 @@ int main(int argc, char *argv[]) {
 
   /* Deallocate parser */
   LuaParserFree(parser, free);
-  
+
   resetLuaParserState(&parser_state);
 
   /* Close files and deallocate */
