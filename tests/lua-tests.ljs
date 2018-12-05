@@ -698,49 +698,48 @@ lrun("calls", function() {
 
 lrun("closures", function() {
 
-/*
-	--print("_VERSION", _VERSION)
-	if _VERSION == "Lua 5.1" then
-		local A,B = 0,{g=10}
-		function f(x)
-		  local a = {}
-		  for i=1,1000 do
-		    local y = 0
-		    do
-		      a[i] = function () B.g = B.g+1; y = y+x; return y+A end
-		    end
-		  end
-		  local dummy = function () return a[A] end
-		  collectgarbage()
+	//print("_VERSION", _VERSION)
+	if( _VERSION->match("Lua 5.1") ) {
+		var A,B = 0,{g=10};
+		function f(x) {
+		  var a = {};
+		  for( i=1,1000 ) {
+		    var y = 0;
+		    {
+		      a[i] = function () { B.g = B.g+1; y += x; return y+A; };
+		    }
+		  }
+		  var dummy = function () { return a[A]; };
+		  collectgarbage();
 		  A = 1; lok(dummy() == a[1]); A = 0;
-		  lok(a[1]() == x)
-		  lok(a[3]() == x)
-		  collectgarbage()
-		  lok(B.g == 12)
-		  return a
-		end
+		  lok(a[1]() == x);
+		  lok(a[3]() == x);
+		  collectgarbage();
+		  lok(B.g == 12);
+		  return a;
+		}
 
-		a = f(10)
+		a = f(10);
 
-		-- force a GC in this level
-		local x = {[1] = {}}   -- to detect a GC
-		setmetatable(x, {__mode = 'kv'})
-		while x[1] do   -- repeat until GC
-		  local a = A..A..A..A  -- create garbage
-		  A = A+1
-		end
-		lok(a[1]() == 20+A)
-		lok(a[1]() == 30+A)
-		lok(a[2]() == 10+A)
-		collectgarbage()
-		lok(a[2]() == 20+A)
-		lok(a[2]() == 30+A)
-		lok(a[3]() == 20+A)
-		lok(a[8]() == 10+A)
-		lok(getmetatable(x).__mode == 'kv')
-		lok(B.g == 19)
-	end
-*/
+		// force a GC in this level
+		var x = {[1] = {}};   // to detect a GC
+		setmetatable(x, {__mode = 'kv'});
+		while( x[1] ) {   // repeat until GC
+		  var a = A..A..A..A;  // create garbage
+		  A += 1;
+		}
+		lok(a[1]() == 20+A);
+		lok(a[1]() == 30+A);
+		lok(a[2]() == 10+A);
+		collectgarbage();
+		lok(a[2]() == 20+A);
+		lok(a[2]() == 30+A);
+		lok(a[3]() == 20+A);
+		lok(a[8]() == 10+A);
+		lok(getmetatable(x).__mode == 'kv');
+		lok(B.g == 19);
+	}
+
 
 	// testing closures with 'for' control variable
 	a = {};
@@ -859,7 +858,7 @@ lrun("closures", function() {
 	var f;
 
 	//print("_VERSION", _VERSION)
-	if( _VERSION == "Lua 5.1" ) {
+	if( _VERSION->match("Lua 5.1") ) {
 		//print("coroutine.running()", coroutine.running())
 		lok(coroutine.running() == null);
 
@@ -1121,9 +1120,9 @@ lrun("metatables", function() {
 	a={}; setmetatable(a, {__metatable = "xuxu",
 			    __tostring=function(x) { return x.name; }});
 	lok(getmetatable(a) == "xuxu");
-	//if( _VERSION < "Lua 5.3" ) {
-	//	lok(tostring(a) == null);
-	//}
+	if( _VERSION->match("Lua 5.1") ) {
+		lok(tostring(a) == null);
+	}
 	// cannot change a protected metatable
 	lok(pcall(setmetatable, a, {}) == false);
 	a.name = "gororoba";
@@ -1364,6 +1363,7 @@ lrun("metatables", function() {
 	t1.__eq = function () { return true; };
 	t1.__lt = function () { return true; };
 	if( _VERSION  == "Lua 5.1" ) {
+		//print("c != d", c != d); print("function () { return c < d; }", pcall((function () { return c < d; })));
 		lok(c != d && ! pcall(function () { return c < d; }));
 	}
 	setmetatable(d, t1);
@@ -1514,7 +1514,7 @@ lrun("literals", function() {
 	lok(string.find(a1, a2) == 31)
 
 	a1 = [==[temp = [=[um valor qualquer]=]; ]==]
-	var res = load(a1) 
+	var res = loadstring(a1) 
 	lok(res)
 	res()
 	lok(temp == 'um valor qualquer')
