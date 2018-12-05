@@ -161,7 +161,9 @@ static void checkname (LexState *ls, expdesc *e) {
 static int registerlocalvar (LexState *ls, TString *varname) {
   FuncState *fs = ls->fs;
   Proto *f = fs->f;
-  int vidx, vidxmax, oldsize = f->sizelocvars;
+  int oldsize = f->sizelocvars;
+/*
+  int vidx, vidxmax;
   vidx = fs->bl ? fs->bl->nactvar : fs->firstlocal;
   vidxmax = fs->nactvar ? fs->nactvar : fs->nlocvars;
   for(; vidx < vidxmax; ++vidx) {
@@ -169,6 +171,7 @@ static int registerlocalvar (LexState *ls, TString *varname) {
       luaX_syntaxerror(ls, luaO_pushfstring(ls->L,
              "Name [%s] already declared", getstr(varname)));
   }
+*/
   luaM_growvector(ls->L, f->locvars, fs->nlocvars, f->sizelocvars,
                   LocVar, SHRT_MAX, "local variables");
   while (oldsize < f->sizelocvars)
@@ -182,6 +185,18 @@ static int registerlocalvar (LexState *ls, TString *varname) {
 static void new_localvar (LexState *ls, TString *name) {
   FuncState *fs = ls->fs;
   Dyndata *dyd = ls->dyd;
+/*
+  int vidx, nactvar_n;
+  vidx = fs->bl ? fs->bl->nactvar : fs->firstlocal;
+  if(vidx < fs->firstlocal) vidx = fs->firstlocal;
+  nactvar_n = fs->nactvar ? fs->nactvar : dyd->actvar.n;
+  if(nactvar_n > fs->nlocvars) nactvar_n = fs->nlocvars;
+  for (; vidx < nactvar_n; ++vidx) {
+    if (name == fs->f->locvars[vidx].varname)
+      luaX_syntaxerror(ls, luaO_pushfstring(ls->L,
+             "Name [%s] already declared", getstr(name)));
+  }
+*/
   int reg = registerlocalvar(ls, name);
   checklimit(fs, dyd->actvar.n + 1 - fs->firstlocal,
                   MAXVARS, "local variables");
@@ -897,6 +912,7 @@ static void funcargs (LexState *ls, expdesc *f, int line) {
 ** =======================================================================
 */
 
+static void inc_dec_op (LexState *ls, OpCode op, expdesc *v, int isPost);
 
 static void primaryexp (LexState *ls, expdesc *v) {
   /* primaryexp -> NAME | '(' expr ')' */
@@ -931,10 +947,14 @@ static void primaryexp (LexState *ls, expdesc *v) {
       singlevar(ls, v);
       return;
     }
-    case TK_MINUSMINUS:
     case TK_PLUSPLUS: {
-      expr(ls, v);
-      ls->t.token = ';';
+      luaX_next(ls);
+      inc_dec_op(ls, OPR_ADD, v, 0);
+      return;
+    }
+    case TK_MINUSMINUS: {
+      luaX_next(ls);
+      inc_dec_op(ls, OPR_SUB, v, 0);
       return;
     }
     default: {
@@ -975,6 +995,16 @@ static void suffixedexp (LexState *ls, expdesc *v) {
         luaK_exp2nextreg(fs, v);
         funcargs(ls, v, line);
         break;
+      }
+      case TK_PLUSPLUS: {
+        luaX_next(ls);
+        inc_dec_op(ls, OPR_ADD, v, 1);
+        return;
+      }
+      case TK_MINUSMINUS: {
+        luaX_next(ls);
+        inc_dec_op(ls, OPR_SUB, v, 1);
+        return;
       }
       default: return;
     }
@@ -1056,8 +1086,8 @@ static UnOpr getunopr (int op) {
     case '-': return OPR_MINUS;
     case '!': return OPR_BNOT;
     case '#': return OPR_LEN;
-    case TK_PLUSPLUS: return OPR_PLUSPLUS;
-    case TK_MINUSMINUS: return OPR_MINUSMINUS;
+    //case TK_PLUSPLUS: return OPR_PLUSPLUS;
+    //case TK_MINUSMINUS: return OPR_MINUSMINUS;
     default: return OPR_NOUNOPR;
   }
 }
@@ -1065,6 +1095,11 @@ static UnOpr getunopr (int op) {
 
 static BinOpr getbinopr (int op) {
   switch (op) {
+    /*
+    * if we change the number/order of elments here
+    * we should also change in the priority struct bellow
+    * and on lcode.h enum BinOpr
+    */
     case '+': return OPR_ADD;
     case '-': return OPR_SUB;
     case '*': return OPR_MUL;
@@ -1097,7 +1132,7 @@ static const struct {
 } priority[] = {  /* ORDER OPR */
    {10, 10}, {10, 10},           /* '+' '-' */
    {11, 11}, {11, 11},           /* '*' '%' */
-   {14, 13},                  /* '^' (right associative) */
+   {14, 13},                  /* '**' (right associative) */
    {11, 11}, {11, 11},           /* '/' '//' */
    {6, 6}, {4, 4}, {5, 5},   /* '&' '|' '~' */
    {7, 7}, {7, 7},           /* '<<' '>>' */
@@ -1265,10 +1300,12 @@ static void assignment (LexState *ls, struct LHS_assign *lh, int nvars) {
 static void assign_compound (LexState *ls, struct LHS_assign *lh, int opType) {
 
   FuncState * fs=ls->fs;
-  expdesc infix, rh;
+  expdesc lhv, infix, rh;
   int nexps;
   int line=ls->linenumber;
   BinOpr op;
+  /*store expression before grounding */
+  lhv = lh->v;
 
   check_condition(ls, VLOCAL <= lh->v.k && lh->v.k <= VINDEXED,
                       "syntax error in left hand expression in compound assignment");
@@ -1284,7 +1321,10 @@ static void assign_compound (LexState *ls, struct LHS_assign *lh, int opType) {
   luaX_next(ls);
 
   /* store compound results in a new register (needed for nested tables) */
-  luaK_reserveregs(fs, 1);
+  if(lh->v.k == VINDEXED) luaK_reserveregs(fs, 1);
+
+  /* ground the lhs expresion */
+  luaK_exp2nextreg(fs, &lh->v);
 
   /* parse right-hand expression */
   nexps = explist(ls, &rh);
@@ -1294,7 +1334,8 @@ static void assign_compound (LexState *ls, struct LHS_assign *lh, int opType) {
   luaK_infix(fs,op,&infix);
 
   luaK_posfix(fs, op, &infix, &rh, line);
-  luaK_storevar(fs, &(lh->v), &infix);
+  /* use the lhs before grounding to store */
+  luaK_storevar(fs, &lhv, &infix);
 }
 
 
@@ -1570,6 +1611,7 @@ static void ifstat (LexState *ls /*, int line*/) {
       continue; /* try again nested ELSE IF */
     }
     block(ls);  /* 'else' part */
+	break;
   }
   luaK_patchtohere(fs, escapelist);  /* patch escape list to 'if' end */
 }
@@ -1654,6 +1696,7 @@ static void exprstat (LexState *ls) {
         assignment(ls, &v, 1);
         break;
       case ';': //done:
+        /* TK_PLUSPLUS, TK_MINUMINUS should be already managed */
         break;
       default:
         luaX_syntaxerror(ls, lua_pushfstring(ls->L,
@@ -1694,6 +1737,35 @@ static void retstat (LexState *ls) {
   }
   luaK_ret(fs, first, nret);
   testnext(ls, ';');  /* skip optional semicolon */
+}
+
+
+static void inc_dec_op (LexState *ls, OpCode op, expdesc *v, int isPost) {
+  FuncState *fs = ls->fs;
+  expdesc lv, e1, e2;
+  int indices;
+  if(!v) v = &lv;
+  indices = fs->freereg;
+  init_exp(&e2, VKINT, 0);
+  e2.u.ival = (lua_Integer)1;
+  if(isPost) {
+    lv = e1 = *v;
+    if (v->k == VINDEXED)
+      luaK_reserveregs(fs, 1);
+    luaK_exp2nextreg(fs, v);
+    luaK_reserveregs(fs, 1); //copy again to operate on it
+    luaK_posfix(fs, op, &e1, &e2, ls->linenumber);
+    luaK_storevar(fs, &lv, &e1);
+    --fs->freereg; //remove extra copy register
+    return;
+  }
+  suffixedexp(ls, v);
+  e1 = *v;
+  if (v->k == VINDEXED)
+    luaK_reserveregs(fs, fs->freereg - indices);
+  luaK_posfix(fs, op, &e1, &e2, ls->linenumber);
+  luaK_storevar(fs, v, &e1);
+  if(v != &lv) luaK_exp2nextreg(fs, v);
 }
 
 
@@ -1746,6 +1818,16 @@ static void statement (LexState *ls) {
     case TK_BREAK:   /* stat -> breakstat */
     case TK_GOTO: {  /* stat -> 'goto' NAME */
       gotostat(ls, luaK_jump(ls->fs));
+      break;
+    }
+    case TK_PLUSPLUS: {
+      luaX_next(ls);
+      inc_dec_op(ls, OPR_ADD, NULL, 0);
+      break;
+    }
+    case TK_MINUSMINUS: {
+      luaX_next(ls);
+      inc_dec_op(ls, OPR_SUB, NULL, 0);
       break;
     }
     case TK_NAME: {
