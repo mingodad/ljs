@@ -24,7 +24,7 @@
     TK_LONGCOMMENT,
     TK_THEEND
   };
-
+  
   enum TokenFlags {
     noSemicolonNeeded = 0x01,
   };
@@ -94,7 +94,7 @@
   }
 
   LuaParserToken *getLastLuaParserState(LuaParserState *pState) {
-    /*
+    /* 
     * There is a problem with this when the last stement is not followed by a '\n'
     * right now we are avoiding it by adding a '\n' at the end when reading the file
     */
@@ -166,8 +166,11 @@
   void local2var(LuaParserToken *tk) {setTokenValue(tk, "var");}
   
   void checkSetAssignTokenOpToken(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1) {
+   /* compound assignment can produce a wrong result when there is more than one expression on the right side */
+   /* so it's a bad idea to do it blindly */
     if(tkAssign->token_id != TK_ASSIGN) return;
     if(pState->noToCompound) return;
+    if(getNextLuaParserState(pState, tkSrc) != tkAssign) return; //if it's a list assignment do nothing
     if(tkSrc->token_value_size == tk1->token_value_size) {
       if(strncmp(tkSrc->token_value, tk1->token_value, tkSrc->token_value_size) == 0) {
         LuaParserToken *tkOp = getNextLuaParserState(pState, tk1);
@@ -179,12 +182,17 @@
           case TK_MINUS:
             newOp = "-="; 
           break;
+/* this ones are safe only if there is one more expresion
+          case TK_MOD:
+            newOp = "%="; 
+          break;
           case TK_MUL:
             newOp = "*="; 
           break;
           case TK_DIV:
             newOp = "/="; 
           break;
+*/
         }
         if(newOp) {
           setTokenValue(tkAssign, newOp);
@@ -203,7 +211,7 @@
     if(OnOff) tk->flags |= fv;
     else tk->flags &= ~fv;
   }
-
+  
   void fixLongStringQuote(LuaParserToken *tk) {
     if(tk->token_value[1] == '[') {
       /* we need at least one '=' on the quote to differentiate from arrays */
