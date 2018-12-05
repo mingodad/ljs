@@ -232,13 +232,22 @@ int main(int argc, char *argv[]) {
 
   int fn_argc = 1;
   int noToCompound = 0;
+  int withTrace = 0;
   if(argc > 2) {
-    if (strcmp(argv[1] , "-nc") == 0) noToCompound = 1;
-    else {
-      printf("usage : %s [options] lua_fname\n\toptions:\n\t\t-nc\tdo not convert to compound assginments\n", argv[0]);
-      exit(1);
+    for(; fn_argc < (argc-1); ++fn_argc) {
+      if (strcmp(argv[fn_argc] , "-nc") == 0) noToCompound = 1;
+#ifndef NDEBUG
+      else if (strcmp(argv[fn_argc] , "-t") == 0) withTrace = 1;
+#endif	    
+      else {
+        printf("usage : %s [options] lua_fname\n\toptions:\n\t\t-nc\tdo not convert to compound assginments\n"
+#ifndef NDEBUG
+                 "\t\t-t\tgenerate parser trace\n"
+#endif	    
+	    , argv[0]);
+        exit(1);
     }
-    fn_argc = 2;
+   }
   }
 
   /* Open input file */
@@ -250,11 +259,13 @@ int main(int argc, char *argv[]) {
     exit(-1);
   }
 
-  /* Open trace file */
-  traceFile = fopen("trace.out", "w");
-  if(traceFile == NULL) {
-    fprintf(stderr, "Can't open trace file\n");
-    exit(-1);
+  if(withTrace) {
+	/* Open trace file */
+	traceFile = fopen("trace.out", "w");
+	if(traceFile == NULL) {
+	    fprintf(stderr, "Can't open trace file\n");
+	    exit(-1);
+	}
   }
 
   /* Get file size */
@@ -309,7 +320,7 @@ int main(int argc, char *argv[]) {
   /* Create parser and set up tracing */
   parser = LuaParserAlloc(malloc);
 #ifndef NDEBUG
-  LuaParserTrace(traceFile, "parser >> ");
+  if(withTrace) LuaParserTrace(traceFile, "parser >> ");
 #endif
 
   //printf("%d:%d:%d:%d\n", TK_SPACE, TK_COMMENT, TK_LONGCOMMENT, TK_THEEND);
@@ -363,7 +374,7 @@ int main(int argc, char *argv[]) {
 
   /* Close files and deallocate */
   fclose(fp);
-  fclose(traceFile);
+ if(withTrace)  fclose(traceFile);
   free(buff);
   return(0);
 }
