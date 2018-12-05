@@ -73,6 +73,9 @@ Multiline string
 is here too
 ]===]
 
+local an, bn, cn, dn
+cn, bn, an = cn-1, bn, an
+
 local LTEST_FLOAT_TOLERANCE = 0.001
 
 
@@ -126,6 +129,18 @@ local simple = function()
   return 0;
   --the end
 end
+
+local secpos = 1
+
+local function waction(a, num)
+  if a or num then  secpos = secpos + (num or 1) end
+  print(a, num, secpos)
+end
+
+waction(nil, nil);
+waction("dad", nil);
+waction(nil, 5);
+waction("car", 6);
 
 
 lresults = function()
