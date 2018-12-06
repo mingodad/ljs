@@ -659,6 +659,11 @@ static void yindex (LexState *ls, expdesc *v) {
   checknext(ls, ']');
 }
 
+static void sindex (LexState *ls, expdesc *v) {
+  /* index -> string */
+  expr(ls, v);
+  luaK_exp2val(ls->fs, v);
+}
 
 /*
 ** {======================================================================
@@ -684,6 +689,9 @@ static void recfield (LexState *ls, struct ConsControl *cc) {
   if (ls->t.token == TK_NAME) {
     checklimit(fs, cc->nh, MAX_INT, "items in a constructor");
     checkname(ls, &key);
+  }
+  else if (ls->t.token == TK_STRING) {
+    sindex(ls, &key);
   }
   else  /* ls->t.token == '[' */
     yindex(ls, &key);
@@ -735,6 +743,7 @@ static void listfield (LexState *ls, struct ConsControl *cc) {
 static void field (LexState *ls, struct ConsControl *cc) {
   /* field -> listfield | recfield */
   switch(ls->t.token) {
+    case TK_STRING:
     case TK_NAME: {  /* may be 'listfield' or 'recfield' */
       int ntk = luaX_lookahead(ls);
       if (!((ntk == '=') || (ntk == ':')))  /* expression? */

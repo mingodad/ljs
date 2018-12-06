@@ -1,3 +1,4 @@
+var json = {"name": "bob"};
 var A = {t: {f: 7}, n: 3}
 A.n = 3;
 print(A.n);
