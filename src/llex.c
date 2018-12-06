@@ -452,7 +452,8 @@ static int llex (LexState *ls, SemInfo *seminfo) {
             break;
         // long comment
         } else if (ls->current == '*') {
-
+            next(ls);
+            int nested = 1;
             for (;;) {
             switch (ls->current) {
               case EOZ:
@@ -462,9 +463,13 @@ static int llex (LexState *ls, SemInfo *seminfo) {
                 next(ls);
                 if (ls->current == '/') {
                   next(ls);
-                  goto end_long_comment;
+                  if(--nested == 0) goto end_long_comment;
                 }
                 break;
+              case '/':
+                next(ls);
+                if(ls->current == '*') ++nested;
+                continue;
               case '\n':
               case '\r': {
                 inclinenumber(ls);
