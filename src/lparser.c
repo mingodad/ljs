@@ -1147,7 +1147,7 @@ static const struct {
    {7, 7}, {7, 7},           /* '<<' '>>' */
    {9, 8},                   /* '..' (right associative) */
    {3, 3}, {3, 3}, {3, 3},   /* ==, <, <= */
-   {3, 3}, {3, 3}, {3, 3},   /* ~=, >, >= */
+   {3, 3}, {3, 3}, {3, 3},   /* !=, >, >= */
    {2, 2}, {1, 1}            /* and, or */
 };
 
@@ -1167,14 +1167,7 @@ static BinOpr subexpr (LexState *ls, expdesc *v, int limit) {
     int line = ls->linenumber;
     luaX_next(ls);
     subexpr(ls, v, UNARY_PRIORITY);
-    switch(uop) {
-    case OPR_PLUSPLUS:
-      break;
-    case OPR_MINUSMINUS:
-      break;
-    default:
-      luaK_prefix(ls->fs, uop, v, line);
-    }
+    luaK_prefix(ls->fs, uop, v, line);
   }
   else simpleexp(ls, v);
   /* expand while operators have priorities higher than 'limit' */
@@ -1316,7 +1309,7 @@ static void assign_compound (LexState *ls, struct LHS_assign *lh, int opType) {
   /*store expression before grounding */
   lhv = lh->v;
 
-  check_condition(ls, VLOCAL <= lh->v.k && lh->v.k <= VINDEXED,
+  check_condition(ls, vkisvar(lh->v.k),
                       "syntax error in left hand expression in compound assignment");
 
   /* parse Compound operation. */
@@ -1620,7 +1613,7 @@ static void ifstat (LexState *ls /*, int line*/) {
       continue; /* try again nested ELSE IF */
     }
     block(ls);  /* 'else' part */
-	break;
+    break;
   }
   luaK_patchtohere(fs, escapelist);  /* patch escape list to 'if' end */
 }
@@ -1709,7 +1702,7 @@ static void exprstat (LexState *ls) {
         break;
       default:
         luaX_syntaxerror(ls, lua_pushfstring(ls->L,
-                         "'+=', '-=', '*=', '/=', '%%=', '..=' or '=' expected"));
+                         "'++', '--', +=', '-=', '*=', '/=', '%%=', '..=' or '=' expected"));
         break;
     }
   }
@@ -1758,6 +1751,8 @@ static void inc_dec_op (LexState *ls, OpCode op, expdesc *v, int isPost) {
   init_exp(&e2, VKINT, 0);
   e2.u.ival = (lua_Integer)1;
   if(isPost) {
+    check_condition(ls, vkisvar(v->k),
+                      "syntax error expression not assignable");
     lv = e1 = *v;
     if (v->k == VINDEXED)
       luaK_reserveregs(fs, 1);
@@ -1769,6 +1764,8 @@ static void inc_dec_op (LexState *ls, OpCode op, expdesc *v, int isPost) {
     return;
   }
   suffixedexp(ls, v);
+  check_condition(ls, vkisvar(v->k),
+                      "syntax error expression not assignable");
   e1 = *v;
   if (v->k == VINDEXED)
     luaK_reserveregs(fs, fs->freereg - indices);
