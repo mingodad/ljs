@@ -33,6 +33,7 @@ typedef enum BinOpr {
   OPR_EQ, OPR_LT, OPR_LE,
   OPR_NE, OPR_GT, OPR_GE,
   OPR_AND, OPR_OR,
+  OPR_CADD, OPR_CSUB, OPR_CMUL, OPR_CDIV, OPR_CMOD, OPR_CCONCAT,
   OPR_NOBINOPR
 } BinOpr;
 
@@ -84,6 +85,5 @@ LUAI_FUNC void luaK_infix (FuncState *fs, BinOpr op, expdesc *v);
 LUAI_FUNC void luaK_posfix (FuncState *fs, BinOpr op, expdesc *v1,
                             expdesc *v2, int line);
 LUAI_FUNC void luaK_setlist (FuncState *fs, int base, int nelems, int tostore);
-
 
 #endif
