@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="test-inc8-0.ljs" />
+				<Option parameters="table-decl.ljs" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>

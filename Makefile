@@ -56,7 +56,7 @@ $(PLATS) clean:
 	cd src && $(MAKE) $@
 
 test:	dummy
-	src/ljs -v
+	src/ljs tests/lua-tests.ljs
 
 install: dummy
 	cd src && $(MKDIR) $(INSTALL_BIN) $(INSTALL_INC) $(INSTALL_LIB) $(INSTALL_MAN) $(INSTALL_LMOD) $(INSTALL_CMOD)
