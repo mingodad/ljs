@@ -1,4 +1,4 @@
-require ("minctest");
+if(!pcall(require,"minctest")) require("tests/minctest");
 
 if( table.getn == null ) {
 	table.getn = function(t) { return #t; };
@@ -898,9 +898,9 @@ lrun("closures", function() {
 	function foo (a, ...) {
 	  lok(coroutine.running() == f);
 	  lok(coroutine.status(f) == "running");
-	  var arg = {...};
-	  for( i=1,table.getn(arg) ) {
-	    _G.x = {coroutine.yield(unpack(arg[i]))};
+	  var xarg = {...};
+	  for( i=1,table.getn(xarg) ) {
+	    _G.x = {coroutine.yield(unpack(xarg[i]))};
 	  }
 	  return unpack(a);
 	}
@@ -1757,13 +1757,13 @@ lrun("tables,next,for", function() {
 	// size tests for vararg
 	lim = 35;
 	function foo (n, ...) {
-	  var arg = {...};
-	  check(arg, n, 0);
+	  var xarg = {...};
+	  check(xarg, n, 0);
 	  lok(select('#', ...) == n);
-	  arg[n+1] = true;
-	  check(arg, mp2(n+1), 0);
-	  arg.x = true;
-	  check(arg, mp2(n+1), 1);
+	  xarg[n+1] = true;
+	  check(xarg, mp2(n+1), 0);
+	  xarg.x = true;
+	  check(xarg, mp2(n+1), 1);
 	}
 	a = {};
 	for( i=1,lim ) { a[i] = true; foo(i, unpack(a)); }
@@ -2443,7 +2443,7 @@ lrun("vararg", function() {
 	if( _G.arg ) {
 		function t::f (...) { return this[arg[1]]+arg.n; }
 	} else {
-		function t::f (...) { var arg = {...}; return this[...]+#arg; }
+		function t::f (...) { var xarg = {...}; return this[...]+#xarg; }
 	}
 	lok(t->f(1,4) == 3 && t->f(2) == 11);
 
