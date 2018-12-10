@@ -38,10 +38,10 @@
 
 /* ORDER RESERVED */
 static const char *const luaX_tokens [] = {
-    "break", "continue", "do", "else",
+    "auto", "break", "continue", "do", "else",
     "false", "__FILE__", "for", "function", "goto", "if",
-    "in", "__LINE__", "var", "null",
-    "return", "true", "while",
+    "in", "let", "__LINE__", "local", "null",
+    "return", "true", "var", "while",
     "&&", "||", "!", "**",
     "//", "..", "...", "==", ">=", "<=", "!=",
     "+=", "-=", "*=", "/=", "%=", "..=",
@@ -454,13 +454,26 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         } else if (ls->current == '*') {
             next(ls);
             int nested = 1;
+            int eq_follow = ls->current == '=';
             for (;;) {
             switch (ls->current) {
               case EOZ:
                 lexerror(ls, "unfinished long comment", TK_EOS);
                 break;  /* to avoid warnings */
+              case '=':
+                next(ls);
+                if(!eq_follow) break;
+                if(ls->current == '*') {
+                  next(ls);
+                  if(ls->current == '/') {
+                    next(ls);
+                    goto end_long_comment;
+                  }
+                }
+                break;
               case '*':
                 next(ls);
+                if(eq_follow) break;
                 if (ls->current == '/') {
                   next(ls);
                   if(--nested == 0) goto end_long_comment;
@@ -468,7 +481,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
                 break;
               case '/':
                 next(ls);
-                if(ls->current == '*') ++nested;
+                if(!eq_follow && ls->current == '*') ++nested;
                 continue;
               case '\n':
               case '\r': {
