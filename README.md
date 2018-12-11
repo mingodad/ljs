@@ -28,6 +28,8 @@ ljsjit at https://github.com/mingodad/ljsjit
 
 ljs-5.1 at https://github.com/mingodad/ljs-5.1
 
+ZeroBraneStudio port at https://github.com/mingodad/ZeroBraneStudioLJS
+
 Here is some code to see how it's like:
 
 ```
