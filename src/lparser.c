@@ -11,6 +11,7 @@
 
 
 #include <string.h>
+#include <stdio.h>
 
 #include "lua.h"
 
@@ -65,6 +66,12 @@ typedef struct BlockCnt {
 static void statement (LexState *ls);
 static void expr (LexState *ls, expdesc *v);
 
+static void parser_warning (LexState *ls, const char *msg) {
+  msg = luaO_pushfstring(ls->L, "warning %s", msg);
+  msg = luaG_addinfo(ls->L, msg, ls->source, ls->linenumber);
+  fprintf(stderr, "%s\n", msg);
+  fflush(stderr);
+}
 
 /* semantic error */
 static l_noret semerror (LexState *ls, const char *msg) {
@@ -179,24 +186,27 @@ static void new_localvar (LexState *ls, TString *name) {
   FuncState *fs = ls->fs;
   Dyndata *dyd = ls->dyd;
 
-  //const char *str = getstr(name);
-  //printf("=== var=%s : %d : %d\n", str, ls->fs->pc, ls->linenumber);
-  int vidx, nactvar_n;
-  vidx = fs->bl ? fs->bl->nactvar + fs->firstlocal : fs->firstlocal;
-  //if(vidx < fs->firstlocal) vidx = fs->firstlocal;
-  //nactvar_n = fs->nactvar ? fs->nactvar : dyd->actvar.n;
-  nactvar_n = dyd->actvar.n;
-  if(nactvar_n > fs->nlocvars) nactvar_n = fs->nlocvars;
-  for (; vidx < nactvar_n; ++vidx) {
-    //LocVar *lv = &fs->f->locvars[vidx];
-    LocVar *lv2 = &fs->f->locvars[dyd->actvar.arr[vidx].idx];
-    //printf("--- %s : %d : %d : %d\n", getstr(lv->varname), vidx, lv->startpc, lv->endpc);
-    //if(lv2) printf("+++ %s : %d : %d : %d\n", getstr(lv2->varname), vidx, lv2->startpc, lv2->endpc);
-    if (lv2 && name == lv2->varname) {
-      /* allow '_' duplicates */
-      if(tsslen(name) == 1 && getstr(name)[0] == '_') break;
-      luaX_syntaxerror(ls, luaO_pushfstring(ls->L,
-             "Name [%s] already declared", getstr(name)));
+  /* allow '_' and '(for...' duplicates */
+  const char *str_name = getstr(name);
+  if(!(str_name[0] == '(' || (tsslen(name) == 1 && str_name[0] == '_'))) {
+    int vidx, nactvar_n, first_block_local;
+    vidx = fs->firstlocal;
+    nactvar_n = dyd->actvar.n;
+    first_block_local = fs->bl ? fs->bl->nactvar+fs->firstlocal : 0;
+    for (; vidx < nactvar_n; ++vidx) {
+      LocVar *lv = &fs->f->locvars[dyd->actvar.arr[vidx].idx];
+      if (lv && name == lv->varname) {
+        if(vidx <= first_block_local) {
+          int saved_top = lua_gettop(ls->L);
+          parser_warning(ls, luaO_pushfstring(ls->L,
+                 "Name [%s] already declared will be shadowed", str_name));
+          lua_settop(ls->L, saved_top);
+        }
+        else {
+          luaX_syntaxerror(ls, luaO_pushfstring(ls->L,
+                 "Name [%s] already declared", str_name));
+        }
+      }
     }
   }
 
