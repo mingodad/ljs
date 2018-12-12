@@ -936,7 +936,7 @@ static void funcargs (LexState *ls, expdesc *f, int line) {
 ** =======================================================================
 */
 
-static void inc_dec_op (LexState *ls, OpCode op, expdesc *v, int isPost);
+static void inc_dec_op (LexState *ls, BinOpr op, expdesc *v, int isPost);
 
 static void primaryexp (LexState *ls, expdesc *v) {
   /* primaryexp -> NAME | '(' expr ')' */
@@ -1744,7 +1744,7 @@ static void retstat (LexState *ls) {
 }
 
 
-static void inc_dec_op (LexState *ls, OpCode op, expdesc *v, int isPost) {
+static void inc_dec_op (LexState *ls, BinOpr op, expdesc *v, int isPost) {
   FuncState *fs = ls->fs;
   expdesc lv, e1, e2;
   int indices;
