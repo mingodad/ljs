@@ -1,5 +1,7 @@
 %name LuaParser
 
+%stack_size 1000
+
 %token_type { LuaParserToken* }
 //%token_type { char* }
 

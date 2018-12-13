@@ -327,6 +327,7 @@ int main(int argc, char *argv[]) {
   while((token = scan(&scanner, buff_end))) {
     if(token != TK_THEEND) {
       LuaParserToken *token_value = pushToken(&parser_state, &scanner, token);
+      //printf("\n==++== %d : %d : %.8s\n", scanner.line, token, scanner.top);
 
       if(token < TK_LEMON_LAST_TOKEN) {
         LuaParser(parser, token, token_value, &parser_state);
