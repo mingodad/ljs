@@ -196,6 +196,16 @@ lfequal = function(a, b)
     end
 end
 
+do --- jit shift/xor
+  local a, b = 0x123456789abcdef0LL, 0x31415926535898LL
+  for i=1,200 do
+    a = bxor(a, b); b = sar(b, 14) + shl(b, 50)
+    a = a - b; b = shl(b, 5) + sar(b, 59)
+    b = bxor(a, b); b = b - shl(b, 13) - shr(b, 51)
+  end
+  assert(b == -7993764627526027113LL)
+end
+
 local k
 local s = format(0 < k and k < 0x1p-1026 and "%+a" or "%+.14g", k)
 
