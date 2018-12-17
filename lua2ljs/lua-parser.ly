@@ -123,6 +123,13 @@
     return ltk;
   }
 
+  int getLuaParserStateForwardCount(LuaParserState *pState, LuaParserToken *tk) {
+    int idx = pState->stack_top-2;
+    int top = idx;
+    while(idx >= 0 && pState->stack[idx] != tk) --idx;
+    return top - idx;
+  }
+
   char *newStrFmt(LuaParserToken *tk, const char* fmt, ...) __attribute__ ((__format__ (__printf__, 2, 3)));
   char *newStrFmt(LuaParserToken *tk, const char* fmt, ...) {
     char tmp[8];
@@ -167,24 +174,47 @@
   }
   void local2var(LuaParserToken *tk) {setTokenValue(tk, "var");}
   
+  int _canMakePlusPlusMinusMinus(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1,
+						LuaParserToken *tkOp, const char *mORp) {
+    LuaParserToken *tkAftertOp = getNextLuaParserState(pState, tkOp);
+    if(tkAftertOp->token_value_size == 1 && tkAftertOp->token_value[0] == '1') {
+	newStrFmt(tkSrc, "%s%.*s", mORp, tkSrc->token_value_size, tkSrc->token_value);
+	setTokenValue(tkAftertOp, "");
+	setTokenValue(tk1, "");
+	setTokenValue(tkOp, "");
+	setTokenValue(tkAssign, "");
+	return 1;
+    }
+    return 0;
+  }
+  
   void checkSetAssignTokenOpToken(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1) {
+
    /* compound assignment can produce a wrong result when there is more than one expression on the right side */
    /* so it's a bad idea to do it blindly */
+
     if(tkAssign->token_id != TK_ASSIGN) return;
     if(pState->noToCompound) return;
     if(getNextLuaParserState(pState, tkSrc) != tkAssign) return; //if it's a list assignment do nothing
     if(tkSrc->token_value_size == tk1->token_value_size) {
       if(strncmp(tkSrc->token_value, tk1->token_value, tkSrc->token_value_size) == 0) {
         LuaParserToken *tkOp = getNextLuaParserState(pState, tk1);
+	int forwardCount = getLuaParserStateForwardCount(pState, tk1);
+
+	if(forwardCount > 2) return; //only safe to do it with two ahead tokens/expressions
+	//printf("== %.*s : %d\n", tkSrc->token_value_size, tkSrc->token_value, forwardCount);
+
         const char *newOp = NULL;
         switch(tkOp->token_id) {
           case TK_PLUS:
+            if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "++")) return;	
             newOp = "+="; 
           break;
           case TK_MINUS:
-            newOp = "-="; 
+            if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "--")) return;	
+            newOp = "-=";
           break;
-/* this ones are safe only if there is one more expresion
+/* this ones are safe only if there is one more expresion */
           case TK_MOD:
             newOp = "%="; 
           break;
@@ -194,7 +224,6 @@
           case TK_DIV:
             newOp = "/="; 
           break;
-*/
         }
         if(newOp) {
           setTokenValue(tkAssign, newOp);
