@@ -32,11 +32,15 @@ regular:
   D        = [0-9] ;
   E        = [Ee] [+-]? D+ ;
   L        = [a-zA-Z_] ;
+  
+  INTSUFFIX   = ( "LL" | "ULL" | "ll" | "ull") ;
 
-  NUMBER   = ( D+ | D* "." D+ | D+ "." D* ) E? ;
+  INTNUMBER   = ( D+ ) INTSUFFIX? ;
+  FLOATNUMBER   = ( D+ | D* "." D+ | D+ "." D* ) E? ;
+  CPLXNUMBER   = ( D+ "." D+ ) "i" ;
 
   HEX_P    = [Pp] [+-]? D+ ;
-  HEXNUM = ('0' [xX] [0-9a-fA-F]+) HEX_P?;
+  HEXNUM = ('0' [xX] [0-9a-fA-F]+) (HEX_P | INTSUFFIX)? ;
 
   WS       = [ \t\r\v\f] ;
   LF       = [\n] ;
@@ -136,8 +140,10 @@ regular:
   IDENTIFIER     { return TK_NAME; }
 
   //types
-  NUMBER           { return TK_NUMBER; }
+  FLOATNUMBER { return TK_NUMBER; }
+  INTNUMBER    { return TK_NUMBER; }
   HEXNUM           { return TK_NUMBER; }
+  CPLXNUMBER  { return TK_NUMBER; }
   STRING1          { return TK_STRING; }
   STRING2          { return TK_STRING; }
 
