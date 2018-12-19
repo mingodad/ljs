@@ -32,6 +32,8 @@ ZeroBraneStudio port at https://github.com/mingodad/ZeroBraneStudioLJS
 
 raptorjit-ljs at https://github.com/mingodad/raptorjit-ljs
 
+snabb-ljs at https://github.com/mingodad/snabb-ljs
+
 Here is some code to see how it's like:
 
 ```
