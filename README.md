@@ -53,7 +53,7 @@ for(i=1, 10) print(i);
 for(k,v in pairs(json)) print(k,v);
 
 for(k,v in pairs(A)) { // blocks are curly braces delimited
-	if(k == "one") continue;
+	if(k == "one") continue; //continue statement in loops
 	print(k, type(k), v);
 }
 
