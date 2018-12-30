@@ -38,7 +38,7 @@ premake5-ljs at https://github.com/mingodad/premake-core/tree/ljs
 
 Here is some code to see how it's like:
 
-```
+```js
 /* Limited json style table declaration */
 var json = {"name": "bob"};
 var A = {t: {f: 7}, n: 3}
