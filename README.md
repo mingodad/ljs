@@ -22,7 +22,7 @@ This is based on Lua 5.3.5, released on 26 Jun 2018.
 For installation instructions, license details, and
 further information about Lua, see doc/readme.html.
 
-There is also :
+There is also the following port from lua to ljs:
 
 ljsjit at https://github.com/mingodad/ljsjit
 
@@ -33,6 +33,8 @@ ZeroBraneStudio port at https://github.com/mingodad/ZeroBraneStudioLJS
 raptorjit-ljs at https://github.com/mingodad/raptorjit-ljs
 
 snabb-ljs at https://github.com/mingodad/snabb-ljs
+
+premake5-ljs at https://github.com/mingodad/premake-core/tree/ljs
 
 Here is some code to see how it's like:
 
