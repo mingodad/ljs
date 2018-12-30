@@ -39,29 +39,46 @@ premake5-ljs at https://github.com/mingodad/premake-core/tree/ljs
 Here is some code to see how it's like:
 
 ```
+/* Limited json style table declaration */
 var json = {"name": "bob"};
 var A = {t: {f: 7}, n: 3}
-A.n = 3;
-print(A.n);
-A.n += 3;
-print(A.n);
-A.t.f = 7;
-print(A.t.f);
-A.t.f += 7;
-print(A.t.f);
-A.t.f += 7
-print(A.t.f);
+var ary = [1,2,3,4]; //Array style declaration, syntax sugar for {}
+var num = 5;
 
-A.n = 3;
-A.t.f = 7;
-function A::mutate(yy) {
-    print(this.t.f)
-    print(this.n)
-    this.t.f *= yy
-    this.n += yy
+if(json.name == "bob") print("Hello Bob !"); // if/ese like in C/C++/Java/Javascript 
+else if(json.name == "mary") print("A pretty woman !");
+else print("Nice to meet you !");
+
+for(i=1, 10) print(i);
+for(k,v in pairs(json)) print(k,v);
+
+for(k,v in pairs(A)) { // blocks are curly braces delimited
+	if(k == "one") continue;
+	print(k, type(k), v);
 }
-A->mutate(10)
-assert(A.t.f == 70 && A.n == 13)
-print(A.t.f, A.n)
 
+while(num > 0) --num; //pre inc/dec operators
+num += 5; // compound operators
+while(num > 0) {
+	print(num--);
+}
+num += 5;
+do { //convention do/while
+	if(num == 3) goto update;
+	print(num);
+update:
+	--num;
+} while(num > 0);
+
+function doIt(p : string) : string { // functions and variables can have an anotation
+	return "Done " .. p;
+}
+
+print(doIt("car"));
+
+function doAgain(p) {
+	return "Done " .. p;
+}
+
+print(doAgain("car"));
 ```
