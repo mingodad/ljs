@@ -45,7 +45,7 @@ var A = {t: {f: 7}, n: 3}
 var ary = [1,2,3,4]; //Array style declaration, syntax sugar for {}
 var num = 5;
 
-if(json.name == "bob") print("Hello Bob !"); // if/ese like in C/C++/Java/Javascript 
+if(json.name == "bob") print("Hello Bob !"); // if/else like in C/C++/Java/Javascript 
 else if(json.name == "mary") print("A pretty woman !");
 else print("Nice to meet you !");
 
@@ -57,7 +57,7 @@ for(k,v in pairs(A)) { // blocks are curly braces delimited
 	print(k, type(k), v);
 }
 
-while(num > 0) --num; //pre inc/dec operators
+while(num > 0) --num; //pre/pos inc/dec operators
 num += 5; // compound operators
 while(num > 0) {
 	print(num--);
