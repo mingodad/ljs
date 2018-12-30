@@ -30,7 +30,7 @@ ljs-5.1 at https://github.com/mingodad/ljs-5.1
 
 ZeroBraneStudio port at https://github.com/mingodad/ZeroBraneStudioLJS
 
-raptorjit-ljs at https://github.com/mingodad/raptorjit-ljs
+raptorjit-ljs at https://github.com/mingodad/rpatorjit-ljs
 
 snabb-ljs at https://github.com/mingodad/snabb-ljs
 
