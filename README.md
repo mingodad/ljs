@@ -63,7 +63,7 @@ while(num > 0) {
 	print(num--);
 }
 num += 5;
-do { //convention do/while
+do { //conventional do/while
 	if(num == 3) goto update;
 	print(num);
 update:
