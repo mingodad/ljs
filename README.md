@@ -65,7 +65,8 @@ while(num > 0) {
 num += 5;
 do { //conventional do/while
 	if(num == 3) goto update;
-	print(num);
+	//inline boolean expression
+	print(num == 2 ? "it's a two" : "it's a " .. num);
 update:
 	--num;
 } while(num > 0);
