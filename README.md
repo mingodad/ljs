@@ -96,3 +96,5 @@ raptorjit-ljs at https://github.com/mingodad/rpatorjit-ljs
 snabb-ljs at https://github.com/mingodad/snabb-ljs
 
 premake5-ljs at https://github.com/mingodad/premake-core/tree/ljs
+
+CorsixTH-0.62-ljs at https://github.com/mingodad/CorsixTH-ljs
