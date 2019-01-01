@@ -98,3 +98,7 @@ snabb-ljs at https://github.com/mingodad/snabb-ljs
 premake5-ljs at https://github.com/mingodad/premake-core/tree/ljs
 
 CorsixTH-0.62-ljs at https://github.com/mingodad/CorsixTH-ljs
+
+The tool lua2ljs does the convertion on almost all Lua code, except dynamic Lua code inside strings, C/C++ code, auxiliar scripts and makefiles, LJS also flag as warning/error duplicate variable declarations and a revision is needed mainly using "ljsc -p -l ljsSource.ljs > /dev/null" to only compile and emit the warnings/error to stderr, then several text scans to search and replace "nil", ".lua" and Lua code inside strings, ...
+
+Then run the tests if available to check that it's working properly (at least with the tests).
