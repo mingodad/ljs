@@ -58,7 +58,7 @@ function Engine::speedTo(v : integer) { //synatx sugar for function member with 
 }
 
 print(Engine.speed);
-Engine->speedTo(12); //syntax sugar for method call with inplicity "this"
+Engine->speedTo(12); //syntax sugar for method call with implicity "this"
 print(Engine.speed);
 ```
 
