@@ -151,7 +151,7 @@ static int str_byte (lua_State *L) {
   lua_Integer posi = posrelat(luaL_optinteger(L, 2, LUA_INDEX_BASE), l);
   lua_Integer pose = posrelat(luaL_optinteger(L, 3, posi), l);
   int n, i;
-  if (posi < 1) posi = 1;
+  if (posi < LUA_INDEX_BASE) posi = LUA_INDEX_BASE;
   if (pose > (lua_Integer)l) pose = l;
   if (posi > pose) return 0;  /* empty interval; return no values */
   if (pose - posi >= INT_MAX)  /* arithmetic overflow? */
@@ -163,6 +163,22 @@ static int str_byte (lua_State *L) {
   return n;
 }
 
+/*
+static int str__index (lua_State *L) {
+  size_t l;
+  const char *s = luaL_checklstring(L, 1, &l);
+//printf("%d: %d\n", __LINE__, (int)l);
+  if (lua_type(L, 2) == LUA_TNUMBER) {
+	lua_Integer posi = posrelat(luaL_optinteger(L, 2, LUA_INDEX_BASE), l);
+//printf("%d: %d\n", __LINE__, (int)posi);
+	if(posi > 0 && ((size_t)posi) <= l) {
+		lua_pushinteger(L, uchar(s[posi]));
+		return 1;
+	}
+  }
+  return luaL_error(L, "value out of range");
+}
+*/
 
 static int str_char (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
@@ -1596,6 +1612,7 @@ static const luaL_Reg strlib[] = {
   {"pack", str_pack},
   {"packsize", str_packsize},
   {"unpack", str_unpack},
+  /*{"__index", str__index},*/
   {NULL, NULL}
 };
 
