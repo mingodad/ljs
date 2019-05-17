@@ -172,7 +172,7 @@
 #define LUA_PATH_MARK           "?"
 #define LUA_EXEC_DIR            "!"
 
-#if LUA_LJS
+#ifdef LUA_LJS
   #define LUA_SCRIPT_EXT ".ljs"
 #else
   #define LUA_SCRIPT_EXT ".lua"
