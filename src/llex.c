@@ -39,11 +39,11 @@
 /* ORDER RESERVED */
 static const char *const luaX_tokens [] = {
     "auto", "break", "continue", "do", "else",
-    "false", "__FILE__", "for", "function", "goto", "if",
-    "in", "let", "__LINE__", "local", "null",
+    "false", "__FILE__", "for", "function", "goto",
+    "idiv", "if", "in", "let", "__LINE__", "local", "null",
     "return", "true", "var", "while",
     "&&", "||", "!", "**",
-    "//", "..", "...", "==", ">=", "<=", "!=",
+    "..", "...", "==", ">=", "<=", "!=",
     "+=", "-=", "*=", "/=", "%=", "..=",
     "++", "--",
     "<<", ">>", "->", "::", "<eof>",

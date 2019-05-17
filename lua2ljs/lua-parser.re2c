@@ -32,7 +32,7 @@ regular:
   D        = [0-9] ;
   E        = [Ee] [+-]? D+ ;
   L        = [a-zA-Z_] ;
-  
+
   INTSUFFIX   = ( "LL" | "ULL" | "ll" | "ull") ;
 
   INTNUMBER   = ( D+ ) INTSUFFIX? ;
@@ -244,12 +244,12 @@ int main(int argc, char *argv[]) {
       if (strcmp(argv[fn_argc] , "-nc") == 0) noToCompound = 1;
 #ifndef NDEBUG
       else if (strcmp(argv[fn_argc] , "-t") == 0) withTrace = 1;
-#endif	    
+#endif
       else {
         printf("usage : %s [options] lua_fname\n\toptions:\n\t\t-nc\tdo not convert to compound assginments\n"
 #ifndef NDEBUG
                  "\t\t-t\tgenerate parser trace\n"
-#endif	    
+#endif
 	    , argv[0]);
         exit(1);
     }

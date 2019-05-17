@@ -26,7 +26,7 @@
     TK_LONGCOMMENT,
     TK_THEEND
   };
-  
+
   enum TokenFlags {
     noSemicolonNeeded = 0x01,
   };
@@ -96,7 +96,7 @@
   }
 
   LuaParserToken *getLastLuaParserState(LuaParserState *pState) {
-    /* 
+    /*
     * There is a problem with this when the last stement is not followed by a '\n'
     * right now we are avoiding it by adding a '\n' at the end when reading the file
     */
@@ -187,7 +187,7 @@
     }
     return 0;
   }
-  
+
   void checkSetAssignTokenOpToken(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1) {
 
    /* compound assignment can produce a wrong result when there is more than one expression on the right side */
@@ -207,16 +207,16 @@
         const char *newOp = NULL;
         switch(tkOp->token_id) {
           case TK_PLUS:
-            if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "++")) return;	
+            if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "++")) return;
             newOp = "+="; 
           break;
           case TK_MINUS:
-            if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "--")) return;	
+            if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "--")) return;
             newOp = "-=";
           break;
 /* this ones are safe only if there is one more expresion */
           case TK_MOD:
-            newOp = "%="; 
+            newOp = "%=";
           break;
           case TK_MUL:
             newOp = "*="; 
@@ -242,7 +242,7 @@
     if(OnOff) tk->flags |= fv;
     else tk->flags &= ~fv;
   }
-  
+
   void fixLongStringQuote(LuaParserToken *tk) {
     if(tk->token_value[1] == '[') {
       /* we need at least one '=' on the quote to differentiate from arrays */
@@ -446,11 +446,11 @@ field       ::= LBRACKET exp RBRACKET ASSIGN exp .
 
 ident     ::= NAME(A) . {
                                       #define SELF_NAME "self"
-                                      if(A->token_value_size == (sizeof(SELF_NAME)-1) 
+                                      if(A->token_value_size == (sizeof(SELF_NAME)-1)
                                             && strncmp(A->token_value, SELF_NAME, A->token_value_size) == 0) setTokenValue(A, "this");
                                       #undef SELF_NAME
                                       #define VAR_NAME "var"
-                                      else if(A->token_value_size == (sizeof(VAR_NAME)-1) 
+                                      else if(A->token_value_size == (sizeof(VAR_NAME)-1)
                                             && strncmp(A->token_value, VAR_NAME, A->token_value_size) == 0) setTokenValue(A, "_v_var");
                                       #undef VAR_NAME
                                     }

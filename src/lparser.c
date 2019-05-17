@@ -59,6 +59,8 @@ typedef struct BlockCnt {
 #define FSCOPE_FORINLOOP		0x02	/* Scope is a (breakable) for in loop. */
 #define FSCOPE_DOWHILELOOP	0x04	/* Scope is a (breakable) do while in loop. */
 
+#define LABEL_BREAK "(break)"
+#define LABEL_CONTINUE "(continue)"
 
 /*
 ** prototypes for recursive non-terminal functions
@@ -182,8 +184,7 @@ static int registerlocalvar (LexState *ls, TString *varname) {
 }
 
 
-static void new_localvar (LexState *ls, TString *name) {
-  FuncState *fs = ls->fs;
+static void var_check_unique_or_shadow (LexState *ls, FuncState *fs, TString *name, int shadowOnly) {
   Dyndata *dyd = ls->dyd;
 
   /* allow '_' and '(for...' duplicates */
@@ -202,13 +203,22 @@ static void new_localvar (LexState *ls, TString *name) {
                  "Name [%s] already declared will be shadowed", str_name));
           lua_settop(ls->L, saved_top);
         }
-        else {
+        else if(!shadowOnly) {
           luaX_syntaxerror(ls, luaO_pushfstring(ls->L,
                  "Name [%s] already declared", str_name));
         }
       }
     }
   }
+  //if(fs->prev) var_check_unique_or_shadow(ls, fs->prev, name, 1);
+}
+
+
+static void new_localvar (LexState *ls, TString *name) {
+  FuncState *fs = ls->fs;
+  Dyndata *dyd = ls->dyd;
+
+  var_check_unique_or_shadow(ls, fs, name, 0);
 
   int reg = registerlocalvar(ls, name);
   checklimit(fs, dyd->actvar.n + 1 - fs->firstlocal,
@@ -487,7 +497,7 @@ static void enterblock (FuncState *fs, BlockCnt *bl, lu_byte isloop) {
 ** create a label named 'continue' to resolve continue statements
 */
 static void continuelabel (LexState *ls) {
-  TString *n = luaS_new(ls->L, "continue");
+  TString *n = luaS_new(ls->L, LABEL_CONTINUE);
   /*ls->fs->pc-1 to jump to inside the loop botton */
   int target = ls->fs->pc-1;
   if(ls->fs->bl->isloop & (FSCOPE_FORINLOOP | FSCOPE_DOWHILELOOP)) --target;
@@ -499,7 +509,7 @@ static void continuelabel (LexState *ls) {
 ** create a label named 'break' to resolve break statements
 */
 static void breaklabel (LexState *ls) {
-  TString *n = luaS_new(ls->L, "break");
+  TString *n = luaS_new(ls->L, LABEL_BREAK);
   int l = newlabelentry(ls, &ls->dyd->label, n, 0, ls->fs->pc);
   findgotos(ls, &ls->dyd->label.arr[l]);
 }
@@ -1383,11 +1393,11 @@ static void gotostat (LexState *ls, int pc) {
     label = str_checkname(ls);
   else if (testnext(ls, TK_BREAK)) {
     luaX_next(ls);  /* skip break */
-    label = luaS_new(ls->L, "break");
+    label = luaS_new(ls->L, LABEL_BREAK);
   }
   else {
     checknext(ls, TK_CONTINUE);  /* skip continue */
-    label = luaS_new(ls->L, "continue");
+    label = luaS_new(ls->L, LABEL_CONTINUE);
   }
   g = newlabelentry(ls, &ls->dyd->gt, label, line, pc);
   findlabel(ls, g);  /* close it if label already defined */
