@@ -521,15 +521,18 @@ static YYACTIONTYPE yy_find_shift_action(
   do{
     i = yy_shift_ofst[stateno];
     assert( i>=0 );
-    /* assert( i+YYNTOKEN<=(int)YY_NLOOKAHEAD ); */
+    assert( i<=YY_ACTTAB_COUNT );
+    assert( i+YYNTOKEN<=(int)YY_NLOOKAHEAD );
     assert( iLookAhead!=YYNOCODE );
     assert( iLookAhead < YYNTOKEN );
     i += iLookAhead;
-    if( i>=YY_NLOOKAHEAD || yy_lookahead[i]!=iLookAhead ){
+    assert( i<(int)YY_NLOOKAHEAD );
+    if( yy_lookahead[i]!=iLookAhead ){
 #ifdef YYFALLBACK
       YYCODETYPE iFallback;            /* Fallback token */
-      if( iLookAhead<sizeof(yyFallback)/sizeof(yyFallback[0])
-             && (iFallback = yyFallback[iLookAhead])!=0 ){
+      assert( iLookAhead<sizeof(yyFallback)/sizeof(yyFallback[0]) );
+      iFallback = yyFallback[iLookAhead];
+      if( iFallback!=0 ){
 #ifndef NDEBUG
         if( yyTraceFILE ){
           fprintf(yyTraceFILE, "%sFALLBACK %s => %s\n",
@@ -544,16 +547,8 @@ static YYACTIONTYPE yy_find_shift_action(
 #ifdef YYWILDCARD
       {
         int j = i - iLookAhead + YYWILDCARD;
-        if( 
-#if YY_SHIFT_MIN+YYWILDCARD<0
-          j>=0 &&
-#endif
-#if YY_SHIFT_MAX+YYWILDCARD>=YY_ACTTAB_COUNT
-          j<YY_ACTTAB_COUNT &&
-#endif
-          j<(int)(sizeof(yy_lookahead)/sizeof(yy_lookahead[0])) &&
-          yy_lookahead[j]==YYWILDCARD && iLookAhead>0
-        ){
+        assert( j<(int)(sizeof(yy_lookahead)/sizeof(yy_lookahead[0])) );
+        if( yy_lookahead[j]==YYWILDCARD && iLookAhead>0 ){
 #ifndef NDEBUG
           if( yyTraceFILE ){
             fprintf(yyTraceFILE, "%sWILDCARD %s => %s\n",
@@ -567,6 +562,7 @@ static YYACTIONTYPE yy_find_shift_action(
 #endif /* YYWILDCARD */
       return yy_default[stateno];
     }else{
+      assert( i>=0 && i<sizeof(yy_action)/sizeof(yy_action[0]) );
       return yy_action[i];
     }
   }while(1);
@@ -729,12 +725,15 @@ static YYACTIONTYPE yy_reduce(
   if( yyTraceFILE && yyruleno<(int)(sizeof(yyRuleName)/sizeof(yyRuleName[0])) ){
     yysize = yyRuleInfoNRhs[yyruleno];
     if( yysize ){
-      fprintf(yyTraceFILE, "%sReduce %d [%s], go to state %d.\n",
+      fprintf(yyTraceFILE, "%sReduce %d [%s]%s, pop back to state %d.\n",
         yyTracePrompt,
-        yyruleno, yyRuleName[yyruleno], yymsp[yysize].stateno);
+        yyruleno, yyRuleName[yyruleno],
+        yyruleno<YYNRULE_WITH_ACTION ? "" : " without external action",
+        yymsp[yysize].stateno);
     }else{
-      fprintf(yyTraceFILE, "%sReduce %d [%s].\n",
-        yyTracePrompt, yyruleno, yyRuleName[yyruleno]);
+      fprintf(yyTraceFILE, "%sReduce %d [%s]%s.\n",
+        yyTracePrompt, yyruleno, yyRuleName[yyruleno],
+        yyruleno<YYNRULE_WITH_ACTION ? "" : " without external action");
     }
   }
 #endif /* NDEBUG */
@@ -808,10 +807,9 @@ static YYACTIONTYPE yy_reduce(
 ** The following code executes when the parse fails
 */
 #ifndef YYNOERRORRECOVERY
-static int yy_parse_failed(
+static void yy_parse_failed(
   yyParser *yypParser           /* The parser */
 ){
-  int yy_rc = 0;
   ParseARG_FETCH
   ParseCTX_FETCH
 #ifndef NDEBUG
@@ -827,19 +825,17 @@ static int yy_parse_failed(
 /************ End %parse_failure code *****************************************/
   ParseARG_STORE /* Suppress warning about unused %extra_argument variable */
   ParseCTX_STORE
-  return yy_rc;
 }
 #endif /* YYNOERRORRECOVERY */
 
 /*
 ** The following code executes when a syntax error first occurs.
 */
-static int yy_syntax_error(
+static void yy_syntax_error(
   yyParser *yypParser,           /* The parser */
   int yymajor,                   /* The major type of the error token */
   ParseTOKENTYPE yyminor         /* The minor type of the error token */
 ){
-  int yy_rc = 0;
   ParseARG_FETCH
   ParseCTX_FETCH
 #define TOKEN yyminor
@@ -848,7 +844,6 @@ static int yy_syntax_error(
 /************ End %syntax_error code ******************************************/
   ParseARG_STORE /* Suppress warning about unused %extra_argument variable */
   ParseCTX_STORE
-  return yy_rc;
 }
 
 /*
@@ -896,13 +891,12 @@ static void yy_accept(
 ** Outputs:
 ** None.
 */
-int Parse(
+void Parse(
   void *yyp,                   /* The parser */
   int yymajor,                 /* The major token code number */
   ParseTOKENTYPE yyminor       /* The value for the token */
   ParseARG_PDECL               /* Optional %extra_argument parameter */
 ){
-  int yy_rc = 0;
   YYMINORTYPE yyminorunion;
   YYACTIONTYPE yyact;   /* The parser action. */
 #if !defined(YYERRORSYMBOL) && !defined(YYNOERRORRECOVERY)
@@ -948,7 +942,7 @@ int Parse(
     }else if( yyact==YY_ACCEPT_ACTION ){
       yypParser->yytos--;
       yy_accept(yypParser);
-      return yy_rc;
+      return;
     }else{
       assert( yyact == YY_ERROR_ACTION );
       yyminorunion.yy0 = yyminor;
@@ -981,8 +975,7 @@ int Parse(
       **
       */
       if( yypParser->yyerrcnt<0 ){
-        yy_rc = yy_syntax_error(yypParser,yymajor,yyminor);
-        if(yy_rc) return yy_rc;
+        yy_syntax_error(yypParser,yymajor,yyminor);
       }
       yymx = yypParser->yytos->major;
       if( yymx==YYERRORSYMBOL || yyerrorhit ){
@@ -1004,12 +997,11 @@ int Parse(
         }
         if( yypParser->yytos < yypParser->yystack || yymajor==0 ){
           yy_destructor(yypParser,(YYCODETYPE)yymajor,&yyminorunion);
-          yy_rc = yy_parse_failed(yypParser);
+          yy_parse_failed(yypParser);
 #ifndef YYNOERRORRECOVERY
           yypParser->yyerrcnt = -1;
 #endif
           yymajor = YYNOCODE;
-          if(yy_rc) return yy_rc;
         }else if( yymx!=YYERRORSYMBOL ){
           yy_shift(yypParser,yyact,YYERRORSYMBOL,yyminor);
         }
@@ -1026,9 +1018,8 @@ int Parse(
       ** Applications can set this macro (for example inside %include) if
       ** they intend to abandon the parse upon the first syntax error seen.
       */
-      yy_rc = yy_syntax_error(yypParser,yymajor,yyminor);
+      yy_syntax_error(yypParser,yymajor, yyminor);
       yy_destructor(yypParser,(YYCODETYPE)yymajor,&yyminorunion);
-      if(yy_rc) return yy_rc;
       break;
 #else  /* YYERRORSYMBOL is not defined */
       /* This is what we do if the grammar does not define ERROR:
@@ -1041,17 +1032,15 @@ int Parse(
       ** three input tokens have been successfully shifted.
       */
       if( yypParser->yyerrcnt<=0 ){
-        yy_rc = yy_syntax_error(yypParser,yymajor,yyminor);
-        if(yy_rc) return yy_rc;
+        yy_syntax_error(yypParser,yymajor, yyminor);
       }
       yypParser->yyerrcnt = 3;
       yy_destructor(yypParser,(YYCODETYPE)yymajor,&yyminorunion);
       if( yyendofinput ){
-        yy_rc = yy_parse_failed(yypParser);
+        yy_parse_failed(yypParser);
 #ifndef YYNOERRORRECOVERY
         yypParser->yyerrcnt = -1;
 #endif
-        if(yy_rc) return yy_rc;
       }
       break;
 #endif
@@ -1069,7 +1058,7 @@ int Parse(
     fprintf(yyTraceFILE,"]\n");
   }
 #endif
-  return yy_rc;
+  return;
 }
 
 /*
@@ -1078,11 +1067,10 @@ int Parse(
 */
 int ParseFallback(int iToken){
 #ifdef YYFALLBACK
-  if( iToken<(int)(sizeof(yyFallback)/sizeof(yyFallback[0])) ){
-    return yyFallback[iToken];
-  }
+  assert( iToken<(int)(sizeof(yyFallback)/sizeof(yyFallback[0])) );
+  return yyFallback[iToken];
 #else
   (void)iToken;
-#endif
   return 0;
+#endif
 }
