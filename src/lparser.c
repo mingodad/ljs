@@ -1101,7 +1101,7 @@ static UnOpr getunopr (int op) {
   switch (op) {
     case TK_NOT: return OPR_NOT;
     case '-': return OPR_MINUS;
-    case '!': return OPR_BNOT;
+    case '~': return OPR_BNOT;
     case '#': return OPR_LEN;
     //case TK_PLUSPLUS: return OPR_PLUSPLUS;
     //case TK_MINUSMINUS: return OPR_MINUSMINUS;
