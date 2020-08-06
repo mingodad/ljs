@@ -173,7 +173,7 @@
     tk->token_value = str;
   }
   void local2var(LuaParserToken *tk) {setTokenValue(tk, "var");}
-  
+
   int _canMakePlusPlusMinusMinus(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1,
 						LuaParserToken *tkOp, const char *mORp) {
     LuaParserToken *tkAftertOp = getNextLuaParserState(pState, tkOp);
@@ -208,7 +208,7 @@
         switch(tkOp->token_id) {
           case TK_PLUS:
             if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "++")) return;
-            newOp = "+="; 
+            newOp = "+=";
           break;
           case TK_MINUS:
             if(_canMakePlusPlusMinusMinus(pState, tkSrc, tkAssign, tk1, tkOp, "--")) return;
@@ -219,10 +219,10 @@
             newOp = "%=";
           break;
           case TK_MUL:
-            newOp = "*="; 
+            newOp = "*=";
           break;
           case TK_DIV:
-            newOp = "/="; 
+            newOp = "/=";
           break;
         }
         if(newOp) {
@@ -233,7 +233,7 @@
       }
     }
   }
-  
+
   void dumpToken(LuaParserToken *tk) {
     printf("%d : %.*s\n", tk->token_id, tk->token_value_size, tk->token_value);
   }
@@ -391,7 +391,7 @@ exp        ::= exp POW(A) exp .  { setTokenValue(A, "**");}
 %left      BITAND BITOR .
 %right    BITNOT .
 exp        ::= BITNOT exp . [NOT]
-exp        ::= exp IDIV exp .
+exp        ::= exp IDIV exp . { setTokenValue(A, "idiv");}
 exp        ::= exp SHL exp .
 exp        ::= exp SHR exp .
 exp        ::= exp BITAND exp .
