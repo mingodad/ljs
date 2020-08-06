@@ -391,11 +391,12 @@ exp        ::= exp POW(A) exp .  { setTokenValue(A, "**");}
 %left      BITAND BITOR .
 %right    BITNOT .
 exp        ::= BITNOT exp . [NOT]
-exp        ::= exp IDIV exp . { setTokenValue(A, "idiv");}
+exp        ::= exp IDIV(A) exp . { setTokenValue(A, "idiv");}
 exp        ::= exp SHL exp .
 exp        ::= exp SHR exp .
 exp        ::= exp BITAND exp .
 exp        ::= exp BITOR exp .
+exp        ::= exp BITNOT(A) exp . { setTokenValue(A, "^");}
 //%endif
 
 setlist    ::= var .
