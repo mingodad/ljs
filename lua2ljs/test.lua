@@ -212,3 +212,11 @@ local s = format(0 < k and k < 0x1p-1026 and "%+a" or "%+.14g", k)
 if 1 == 2 then
   print("1 == 2");
 end
+
+local ia, ib;
+ia = 5;
+ib = 2;
+local ic = ia // ib;
+ic = ia ~ ib;
+
+
