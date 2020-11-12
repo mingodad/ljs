@@ -1,6 +1,9 @@
 typedef struct LuaScanner {
   char *top, *last_top, *cur, *ptr, *pos, *limit;
   int line;
+#ifndef NDEBUG
+  char parsePrompt[32];
+#endif
 } LuaScanner;
 
 #define   YYCTYPE     unsigned char
@@ -13,6 +16,9 @@ static void processNewLine(LuaScanner* s)
   //printf("%d:%.25s\n", s->line, s->top);
   s->pos = s->cur;
   s->line++;
+#ifndef NDEBUG
+  snprintf(s->parsePrompt, sizeof(s->parsePrompt), "parser %d >>", s->line);
+#endif
 }
 
 static int scan(LuaScanner* s, char *buff_end) {
@@ -168,7 +174,7 @@ LongString:
 /*!re2c
 
   "[" "="* "["   { int qsz = (int)(s->cur - long_top); if(qsz == quote_size) nest_count++; goto LongString; }
-  ("]" "="*) / "]"   { int qsz = (int)(s->cur+1 - long_top); if( (nest_count == 0) && (qsz == quote_size)) { ++s->cur; return TK_LONGSTRING; };
+  ("]" "="*) / "]"   { int qsz = (int)(s->cur+1 - long_top); if( (nest_count == 0) && (qsz == quote_size)) { if(*s->cur == '\n') processNewLine(s); ++s->cur; return TK_LONGSTRING; };
                           if(qsz == quote_size) nest_count--; goto LongString; }
 
   LF              { processNewLine(s); goto LongString; }
@@ -193,7 +199,7 @@ LongComment:
 /*!re2c
 
   "[" "="* "["   { int qsz = (int)(s->cur - long_top); if(qsz == quote_size) nest_count++; goto LongComment; }
-  ("]" "="*) / "]"   { int qsz = (int)(s->cur+1 - long_top); if( (nest_count == 0) && (qsz == quote_size)) { ++s->cur; return TK_LONGCOMMENT; };
+  ("]" "="*) / "]"   { int qsz = (int)(s->cur+1 - long_top); if( (nest_count == 0) && (qsz == quote_size)) { if(*s->cur == '\n') processNewLine(s); ++s->cur; return TK_LONGCOMMENT; };
                           if(qsz == quote_size) nest_count--; goto LongComment; }
 
   LF              { processNewLine(s); goto LongComment; }
@@ -310,6 +316,9 @@ int main(int argc, char *argv[]) {
   scanner.pos = buff;
   scanner.ptr = buff;
   scanner.limit = buff+size;
+#ifndef NDEBUG
+   snprintf(scanner.parsePrompt, sizeof(scanner.parsePrompt), "parser %d >>", scanner.line);
+#endif
 
   /* Initialize parser state */
   initializeLuaParserState(&parser_state);
@@ -326,7 +335,7 @@ int main(int argc, char *argv[]) {
   /* Create parser and set up tracing */
   parser = LuaParserAlloc(malloc);
 #ifndef NDEBUG
-  if(withTrace) LuaParserTrace(traceFile, "parser >> ");
+  if(withTrace) LuaParserTrace(traceFile, scanner.parsePrompt);
 #endif
 
   //printf("%d:%d:%d:%d\n", TK_SPACE, TK_COMMENT, TK_LONGCOMMENT, TK_THEEND);

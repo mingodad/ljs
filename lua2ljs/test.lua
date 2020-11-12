@@ -74,6 +74,7 @@ is here too
 ]===]
 
 local an, bn, cn, dn
+cn = 10
 cn, bn, an = cn-1, bn, an
 
 local LTEST_FLOAT_TOLERANCE = 0.001
@@ -195,7 +196,7 @@ lfequal = function(a, b)
             a, b))
     end
 end
-
+--[[
 do --- jit shift/xor
   local a, b = 0x123456789abcdef0LL, 0x31415926535898LL
   for i=1,200 do
@@ -205,9 +206,9 @@ do --- jit shift/xor
   end
   assert(b == -7993764627526027113LL)
 end
-
-local k
-local s = format(0 < k and k < 0x1p-1026 and "%+a" or "%+.14g", k)
+]]
+local k = 0
+local s = string.format(0 < k and k < 0x1p-1026 and "%+a" or "%+.14g", k)
 
 if 1 == 2 then
   print("1 == 2");

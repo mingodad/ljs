@@ -172,6 +172,13 @@
     tk->token_value_size = strlen(str);
     tk->token_value = str;
   }
+  void moveTokenValue(LuaParserToken *tk, LuaParserToken *tk_src) {
+    if(tk->token_value_size < 0) free((void*)tk->token_value);
+    tk->token_value_size = tk_src->token_value_size;
+    tk->token_value = tk_src->token_value;
+    tk_src->token_value = NULL;
+    tk_src->token_value_size = 0;
+  }
   void local2var(LuaParserToken *tk) {setTokenValue(tk, "var");}
 
   int _canMakePlusPlusMinusMinus(LuaParserState *pState, LuaParserToken *tkSrc, LuaParserToken *tkAssign, LuaParserToken *tk1,
@@ -329,7 +336,7 @@ laststat   ::= RETURN explist1 .
 
 binding    ::= LOCAL(A) namelist . { local2var(A);}
 binding    ::= LOCAL(A) namelist ASSIGN(B) explist1 . { local2var(A); /*setTokenValue(B, ":=:");*/}
-binding    ::= LOCAL(A) FUNCTION ident funcbody . { local2var(A);}
+binding    ::= LOCAL(A) FUNCTION(B) ident(C) funcbody . { local2var(A); moveTokenValue(B, C); setTokenValue(C, "= function");}
 
 funcname   ::= dottedname .
 funcname   ::= dottedname COLON(A) ident . { setTokenValue(A, "::");}
