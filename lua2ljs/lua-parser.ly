@@ -336,7 +336,8 @@ laststat   ::= RETURN explist1 .
 
 binding    ::= LOCAL(A) namelist . { local2var(A);}
 binding    ::= LOCAL(A) namelist ASSIGN(B) explist1 . { local2var(A); /*setTokenValue(B, ":=:");*/}
-binding    ::= LOCAL(A) FUNCTION(B) ident(C) funcbody . { local2var(A); moveTokenValue(B, C); setTokenValue(C, "= function");}
+binding    ::= LOCAL(A) FUNCTION ident funcbody . { local2var(A);}
+/*binding    ::= LOCAL(A) FUNCTION(B) ident(C) funcbody . { local2var(A); moveTokenValue(B, C); setTokenValue(C, "= function");}*/
 
 funcname   ::= dottedname .
 funcname   ::= dottedname COLON(A) ident . { setTokenValue(A, "::");}
