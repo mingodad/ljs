@@ -830,7 +830,14 @@ static void constructor_array (LexState *ls, expdesc *t) {
 
 /* }====================================================================== */
 
-
+static void optParamType(LexState *ls) {
+      if(testnext(ls, ':')) { /*optional parameter type*/
+        checknext(ls, TK_NAME); /*for now do nothing, discard*/
+        if(testnext(ls, '[')) { /*optional parameter type*/
+          checknext(ls, ']'); /*for now do nothing, discard*/
+        }
+      }
+}
 
 static void parlist (LexState *ls) {
   /* parlist -> [ param { ',' param } ] */
@@ -853,9 +860,7 @@ static void parlist (LexState *ls) {
         }
         default: luaX_syntaxerror(ls, "<name> or '...' expected");
       }
-      if(testnext(ls, ':')) { /*optional parameter type*/
-        checknext(ls, TK_NAME); /*for now do nothing, discard*/
-      }
+      optParamType(ls);
     } while (!f->is_vararg && testnext(ls, ','));
   }
   adjustlocalvars(ls, nparams);
@@ -878,9 +883,7 @@ static void body (LexState *ls, expdesc *e, int ismethod, int line) {
   }
   parlist(ls);
   checknext(ls, ')');
-  if(testnext(ls, ':')) { /*optional function return type*/
-      checknext(ls, TK_NAME); /*for now do nothing, discard*/
-  }
+  optParamType(ls);
   checknext(ls, '{');
   statlist(ls);
   new_fs.f->lastlinedefined = ls->linenumber;
@@ -1652,9 +1655,7 @@ static void localstat (LexState *ls) {
   do {
     new_localvar(ls, str_checkname(ls));
     nvars++;
-    if(testnext(ls, ':')) { /*optional parameter type*/
-      checknext(ls, TK_NAME); /*for now do nothing, discard*/
-    }
+    optParamType(ls);
   } while (testnext(ls, ','));
   if (testnext(ls, '='))
     nexps = explist(ls, &e);
@@ -1841,16 +1842,6 @@ static void statement (LexState *ls) {
     case TK_BREAK:   /* stat -> breakstat */
     case TK_GOTO: {  /* stat -> 'goto' NAME */
       gotostat(ls, luaK_jump(ls->fs));
-      break;
-    }
-    case TK_PLUSPLUS: {
-      luaX_next(ls);
-      inc_dec_op(ls, OPR_ADD, NULL, 0);
-      break;
-    }
-    case TK_MINUSMINUS: {
-      luaX_next(ls);
-      inc_dec_op(ls, OPR_SUB, NULL, 0);
       break;
     }
     case TK_NAME: {
