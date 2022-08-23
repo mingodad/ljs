@@ -706,6 +706,7 @@ struct ConsControl {
   int tostore;  /* number of array elements pending to be stored */
 };
 
+
 static void recfield (LexState *ls, struct ConsControl *cc) {
   /* recfield -> (NAME | '['exp1']') = exp1 */
   FuncState *fs = ls->fs;
@@ -1482,6 +1483,7 @@ static void dowhilestat (LexState *ls, int line) {
   check_match(ls, TK_WHILE, TK_DO, line);
   line = ls->linenumber;
   checknext(ls, '(');
+  continuelabel(ls);  /* close pending continues */
   condexit = nocond(ls);  /* read condition (inside scope block) */
   check_match(ls, ')', TK_WHILE, line);
   if (bl2.upval)  /* upvalues? */
@@ -1600,7 +1602,6 @@ static void forstat (LexState *ls, int line) {
 
 static void test_then_block (LexState *ls, int *escapelist) {
   /* test_then_block -> [IF | ELSEIF] cond THEN block */
-  BlockCnt bl;
   FuncState *fs = ls->fs;
   expdesc v;
   int jf;  /* instruction to skip 'then' code (if condition is false) */
@@ -1609,10 +1610,8 @@ static void test_then_block (LexState *ls, int *escapelist) {
   expr(ls, &v);  /* read condition */
   checknext(ls, ')');
   luaK_goiftrue(ls->fs, &v);  /* skip over block if condition is false */
-  enterblock(fs, &bl, 0);
   jf = v.f;
   block(ls);  /* 'then' part */
-  leaveblock(fs);
   if (ls->t.token == TK_ELSE)  /* followed by 'else'/'else if'? */
     luaK_concat(fs, escapelist, luaK_jump(fs));  /* must jump over it */
   luaK_patchtohere(fs, jf);
