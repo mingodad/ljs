@@ -41,12 +41,25 @@ regular:
 
   INTSUFFIX   = ( "LL" | "ULL" | "ll" | "ull") ;
 
-  INTNUMBER   = ( D+ ) INTSUFFIX? ;
-  FLOATNUMBER   = ( D+ | D* "." D+ | D+ "." D* ) E? ;
+  HEX_P    = [Pp] [+-]? D+ ;
+  HEX_PREFIX = "0" [xX];
+  HEX_DIGIT = [0-9a-fA-F];
+
+  FLOATNUMBER   = ( D+ | HEX_PREFIX HEX_DIGIT+) E
+				|(
+					D* "." D+
+					| D+ "." D*
+					| HEX_PREFIX
+					(
+						HEX_DIGIT* "." HEX_DIGIT+
+						| HEX_DIGIT+ "." HEX_DIGIT*
+					)
+				) E? ;
+
   CPLXNUMBER   = ( D+ "." D+ ) "i" ;
 
-  HEX_P    = [Pp] [+-]? D+ ;
-  HEXNUM = ('0' [xX] [0-9a-fA-F]+) (HEX_P | INTSUFFIX)? ;
+  INTNUMBER   = ( D+ ) INTSUFFIX? ;
+  HEXNUM = (HEX_PREFIX HEX_DIGIT+) (HEX_P | INTSUFFIX)? ;
 
   WS       = [ \t\r\v\f] ;
   LF       = [\n] ;
@@ -111,7 +124,7 @@ regular:
   ".."             { return TK_CONCAT; }
   "<"            { return TK_LT; }
   ">"            { return TK_BT; }
-  ","             { return TK_COMMA; }
+  //","             { return TK_COMMA; }
   "=="             { return TK_EQ; }
   ">="             { return TK_BTEQ; }
   "<="             { return TK_LTEQ; }
@@ -342,7 +355,7 @@ int main(int argc, char *argv[]) {
   while((token = scan(&scanner, buff_end))) {
     if(token != TK_THEEND) {
       LuaParserToken *token_value = pushToken(&parser_state, &scanner, token);
-      //printf("\n==++== %d : %d : %.8s\n", scanner.line, token, scanner.top);
+      //printf("\n==++== %d : %d : %.8s ::%.*s\n", scanner.line, token, scanner.top, token_value->token_value_size, token_value->token_value);
 
       if(token < TK_LEMON_LAST_TOKEN) {
         LuaParser(parser, token, token_value, &parser_state);

@@ -220,4 +220,14 @@ ib = 2;
 local ic = ia // ib;
 ic = ia ~ ib;
 
+if a > b && c < d && k > j then
+    print("big")
+elseif x <= a and a <= z and b >= u then
+    print("failed")
+elseif 0xc0 <= a and a <= 0xdf and b >= 0x80 then
+    print("failed")
+end
 
+local offset = 0
+if offset >= 10 then offset = offset - 100 end
+if offset >= 0x80 then offset = offset - 0x100 end

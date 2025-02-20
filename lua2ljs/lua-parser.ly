@@ -346,6 +346,8 @@ dottedname ::= ident .
 dottedname ::= dottedname DOT ident .
 
 namelist   ::= ident .
+//namelist   ::= ident COLON ident .
+//namelist   ::= ident COLON ident LBRACKET RBRACKET.
 namelist   ::= namelist COMMA ident .
 
 explist1   ::= exp .
@@ -399,7 +401,7 @@ exp        ::= exp POW(A) exp .  { setTokenValue(A, "**");}
 %left      BITAND BITOR .
 %right    BITNOT .
 exp        ::= BITNOT exp . [NOT]
-exp        ::= exp IDIV(A) exp . { setTokenValue(A, "idiv");}
+exp        ::= exp IDIV(A) exp . { setTokenValue(A, " idiv ");}
 exp        ::= exp SHL exp .
 exp        ::= exp SHR exp .
 exp        ::= exp BITAND exp .
@@ -462,6 +464,14 @@ ident     ::= NAME(A) . {
                                       else if(A->token_value_size == (sizeof(VAR_NAME)-1)
                                             && strncmp(A->token_value, VAR_NAME, A->token_value_size) == 0) setTokenValue(A, "_v_var");
                                       #undef VAR_NAME
+                                      #define NULL_NAME "null"
+                                      else if(A->token_value_size == (sizeof(NULL_NAME)-1)
+                                            && strncmp(A->token_value, NULL_NAME, A->token_value_size) == 0) setTokenValue(A, "_v_null");
+                                      #undef NULL_NAME
+                                      #define THIS_NAME "this"
+                                      else if(A->token_value_size == (sizeof(THIS_NAME)-1)
+                                            && strncmp(A->token_value, THIS_NAME, A->token_value_size) == 0) setTokenValue(A, "_v_this");
+                                      #undef THIS_NAME
                                     }
 
 string    ::= STRING .

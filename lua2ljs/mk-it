@@ -3,7 +3,7 @@
 
 parser_fn=lua-parser
 if ./lemon $parser_fn.ly
-then 
+then
     if re2c -Wundefined-control-flow $parser_fn.re2c -o $parser_fn-re2c.c
     then
 	cat $parser_fn-re2c.c >> $parser_fn.c
@@ -11,7 +11,7 @@ then
 	if gcc -Wall -g -o lua2ljs $parser_fn.c
 	then
 	    echo Done!
-	    ./lua2ljs > test-rmk.lua 2>&1
+	    ./lua2ljs > test-rmk.ljs 2>&1
 	fi
     fi
 fi
