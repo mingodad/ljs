@@ -405,7 +405,7 @@ struct lemon {
   struct symbol *errsym;   /* The error symbol */
   struct symbol *wildcard; /* Token that matches anything */
   char *name;              /* Name of the generated parser */
-  char *arg;               /* Declaration of the 3th argument to parser */
+  char *arg;               /* Declaration of the 3rd argument to parser */
   char *ctx;               /* Declaration of 2nd argument to constructor */
   char *tokentype;         /* Type of terminal symbols in the parser stack */
   char *vartype;           /* The default type of non-terminal symbols */
@@ -655,7 +655,6 @@ acttab *acttab_alloc(int nsymbol, int nterminal){
     fprintf(stderr,"Unable to allocate memory for a new acttab.");
     exit(1);
   }
-  memset(p, 0, sizeof(*p));
   p->nsymbol = nsymbol;
   p->nterminal = nterminal;
   return p;
@@ -858,7 +857,6 @@ void FindRulePrecedences(struct lemon *xp)
       }
     }
   }
-  return;
 }
 
 /* Find all nonterminals which will generate the empty string.
@@ -921,7 +919,6 @@ void FindFirstSets(struct lemon *lemp)
       }
     }
   }while( progress );
-  return;
 }
 
 /* Compute all LR(0) states for the grammar.  Links
@@ -981,7 +978,6 @@ void FindStates(struct lemon *lemp)
   ** computed automatically during the computation of the first one.
   ** The returned pointer to the first state is not used. */
   (void)getstate(lemp);
-  return;
 }
 
 /* Return a pointer to a state which is described by the configuration
@@ -1057,7 +1053,7 @@ PRIVATE void buildshifts(struct lemon *lemp, struct state *stp)
   struct symbol *bsp;  /* Symbol following the dot in configuration "bcfp" */
   struct state *newstp; /* A pointer to a successor state */
 
-  /* Each configuration becomes complete after it contibutes to a successor
+  /* Each configuration becomes complete after it contributes to a successor
   ** state.  Initially, all configurations are incomplete */
   for(cfp=stp->cfp; cfp; cfp=cfp->next) cfp->status = INCOMPLETE;
 
@@ -1354,7 +1350,6 @@ void Configlist_init(struct lemon *lemp){
   lemp->basis = 0;
   lemp->basisend = &lemp->basis;
   Configtable_init(lemp);
-  return;
 }
 
 /* Initialized the configuration list builder */
@@ -1364,7 +1359,6 @@ void Configlist_reset(struct lemon *lemp){
   lemp->basis = 0;
   lemp->basisend = &lemp->basis;
   Configtable_clear(lemp, 0);
-  return;
 }
 
 /* Add another configuration to the configuration list */
@@ -1465,7 +1459,6 @@ void Configlist_closure(struct lemon *lemp)
       }
     }
   }
-  return;
 }
 
 /* Sort the configuration list */
@@ -1473,7 +1466,6 @@ void Configlist_sort(struct lemon *lemp){
   lemp->current = (struct config*)msort((char*)lemp->current,(char**)&(lemp->current->next),
                                   Configcmp);
   lemp->currentend = 0;
-  return;
 }
 
 /* Sort the basis configuration list */
@@ -1481,7 +1473,6 @@ void Configlist_sortbasis(struct lemon *lemp){
   lemp->basis = (struct config*)msort((char*)lemp->current,(char**)&(lemp->current->bp),
                                 Configcmp);
   lemp->basisend = 0;
-  return;
 }
 
 /* Return a pointer to the head of the configuration list and
@@ -1515,7 +1506,6 @@ void Configlist_eat(struct lemon *lemp, struct config *cfp)
     if( cfp->fws ) SetFree(cfp->fws);
     deleteconfig(lemp, cfp);
   }
-  return;
 }
 /***************** From the file "error.c" *********************************/
 /*
@@ -1910,7 +1900,7 @@ static char *merge(
 **
 ** Return Value:
 **   A pointer to the head of a sorted list containing the elements
-**   orginally in list.
+**   originally in list.
 **
 ** Side effects:
 **   The "next" pointers for elements in list are changed.
@@ -2451,10 +2441,19 @@ static void parseonetoken(struct lemon *lem, struct pstate *psp)
         if( msp->type!=MULTITERMINAL ){
           struct symbol *origsp = msp;
           msp = (struct symbol *) calloc(1,sizeof(*msp));
-          memset(msp, 0, sizeof(*msp));
+          if( msp==0 ){
+            fprintf(stderr,
+               "Unable to allocate memory for a new symbol.\n");
+            exit(1);
+          }
           msp->type = MULTITERMINAL;
           msp->nsubsym = 1;
           msp->subsym = (struct symbol **) calloc(1,sizeof(struct symbol*));
+          if( msp->subsym==0 ){
+            fprintf(stderr,
+               "Unable to allocate memory for a new sub symbol.\n");
+            exit(1);
+          }
           msp->subsym[0] = origsp;
           msp->name = origsp->name;
           psp->rhs[psp->nrhs-1] = msp;
@@ -2735,7 +2734,7 @@ static void parseonetoken(struct lemon *lem, struct pstate *psp)
       ** in order to control their assigned integer number.  The number for
       ** each token is assigned when it is first seen.  So by including
       **
-      **     %token ONE TWO THREE
+      **     %token ONE TWO THREE.
       **
       ** early in the grammar file, that assigns small consecutive values
       ** to each of the tokens ONE TWO and THREE.
@@ -3536,11 +3535,10 @@ void ReportOutput(struct lemon *lemp)
     fprintf(fp,"\n");
   }
   fclose(fp);
-  return;
 }
 
 /* Search for the file "name" which is in the same directory as
-** the exacutable */
+** the executable */
 PRIVATE char *pathsearch(char *argv0, char *name, int modemask)
 {
   const char *pathlist;
@@ -3740,7 +3738,6 @@ PRIVATE void tplt_print(FILE *out, struct lemon *lemp, char *str, int *lineno)
   if (!lemp->nolinenosflag) {
     (*lineno)++; tplt_linedir(out,*lineno,lemp->outname);
   }
-  return;
 }
 
 /*
@@ -3787,7 +3784,6 @@ void emit_destructor_code(
    (*lineno)++; tplt_linedir(out,*lineno,lemp->outname);
  }
  fprintf(out,"}\n"); (*lineno)++;
- return;
 }
 
 /*
@@ -3899,7 +3895,7 @@ PRIVATE int translate_code(struct lemon *lemp, struct rule *rp){
     lhsdirect = 1;
   }else if( rp->rhsalias[0]==0 ){
     /* The left-most RHS symbol has no value.  LHS direct is ok.  But
-    ** we have to call the distructor on the RHS symbol first. */
+    ** we have to call the destructor on the RHS symbol first. */
     lhsdirect = 1;
     if( has_destructor(rp->rhs[0],lemp) ){
       append_str(&sa_buf, 0,0,0,0);
@@ -4104,8 +4100,6 @@ PRIVATE void emit_code(
  if( rp->codePrefix ){
    fprintf(out, "}\n"); (*lineno)++;
  }
-
- return;
 }
 
 /*
@@ -4880,7 +4874,7 @@ void ReportTable(
   ** yyRuleInfoNRhs[].
   **
   ** Note: This code depends on the fact that rules are number
-  ** sequentually beginning with 0.
+  ** sequentially beginning with 0.
   */
   for(i=0, rp=lemp->rule; rp; rp=rp->next, i++){
     fprintf(out,"  %4d,  /* (%d) ", rp->lhs->index, i);
@@ -4967,7 +4961,6 @@ void ReportTable(
   fclose(in);
   fclose(out);
   if( sql ) fclose(sql);
-  return;
 }
 
 /* Generate a header file for the parser */
@@ -5007,7 +5000,6 @@ void ReportHeader(struct lemon *lemp)
     fprintf(out," %s%s = %3d\n};\n", prefix, "LEMON_LAST_TOKEN", i);
     fclose(out);
   }
-  return;
 }
 
 /* Reduce the size of the action tables, if possible, by making use
@@ -5902,5 +5894,4 @@ void Configtable_clear(struct lemon *lem, int(*f)(struct config *))
   if( f ) for(i=0; i<lem->x4a->count; i++) (*f)(lem->x4a->tbl[i].data);
   for(i=0; i<lem->x4a->size; i++) lem->x4a->ht[i] = 0;
   lem->x4a->count = 0;
-  return;
 }
